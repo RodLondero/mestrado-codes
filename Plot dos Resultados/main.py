@@ -7,11 +7,10 @@ import pandas as pd
 import numpy as np
 from utils import get_data_from_file, round_up
 
+
 # Don't forget to change de results directory in "utils.py"
 
-
 def main():
-
     fig = plt.figure(figsize=(10, 10))  # type: figure.Figure
     ax = fig.subplots(2, 3)
 
@@ -33,7 +32,7 @@ def main():
                    xytext=(50, 8),
                    arrowprops=dict(arrowstyle="->"),
                    xycoords="data"
-    )
+                   )
     ax_ei.legend(loc='upper left')
     # plot_energia_incidente(EI_ASTM.copy(),    ax[1][1], label="EI pela ASTM")
     # plot_energia_incidente(EI_Energia.copy(), ax[1][1], label="EI pela Energia Interna", title='Energia Incidente')
@@ -60,14 +59,14 @@ def plot_energia_incidente(df: pd.DataFrame, ax: axes.Axes, label: str = "Energi
                  label=label,
                  xlabel='Tempo ($ms$)',
                  ylabel='Energia Incidente ($cal/cm^2$)',
-                #  xlim=(0, max(x)),
+                 #  xlim=(0, max(x)),
                  xlim=(0, 95),
                  ylim=(0, round_up(max(y))))
 
     ax.xaxis.set_major_locator(MultipleLocator(10))
     ax.xaxis.set_minor_locator(MultipleLocator(5))
-    ax.yaxis.set_major_locator(MultipleLocator(round_up(max(y), 0)/10))
-    ax.yaxis.set_minor_locator(MultipleLocator(round_up(max(y), 0)/10/2))
+    ax.yaxis.set_major_locator(MultipleLocator(round_up(max(y), 0) / 10))
+    ax.yaxis.set_minor_locator(MultipleLocator(round_up(max(y), 0) / 10 / 2))
     ax.grid(b=True, which='major', ls='dashed', alpha=0.5)
     ax.grid(b=True, which='minor', ls='dotted', alpha=0.5)
 
@@ -78,7 +77,7 @@ def plot_corrente(file_name: str, ax: axes.Axes):
     corrente.rename(columns={'eletrodo_a_corrente': 'Corrente A'}, inplace=True)
     corrente.rename(columns={'eletrodo_b_corrente': 'Corrente B'}, inplace=True)
     corrente.rename(columns={'eletrodo_c_corrente': 'Corrente C'}, inplace=True)
-    corrente['flow-time'] = corrente['flow-time']*1000
+    corrente['flow-time'] = corrente['flow-time'] * 1000
 
     ax = corrente.plot(x='flow-time', y=['Corrente A', 'Corrente B', 'Corrente C'], ax=ax,
                        title='Densidade de Corrente',
@@ -94,7 +93,7 @@ def plot_corrente(file_name: str, ax: axes.Axes):
 def plot_temperatura_fluido(file_name: str, ax: axes.Axes):
     temperatura_fluido = get_data_from_file(file_name)
     temperatura_fluido.rename(columns={'fluido-temperatura': 'Temperatura'}, inplace=True)
-    temperatura_fluido['flow-time'] = temperatura_fluido['flow-time']*1000
+    temperatura_fluido['flow-time'] = temperatura_fluido['flow-time'] * 1000
 
     ax = temperatura_fluido.plot(x='flow-time', y='Temperatura', ax=ax,
                                  title='Temperatura Máxima do Ar',
@@ -120,7 +119,7 @@ def plot_temperatura_calorimetro(file_name: str, ax: axes.Axes, ls='solid'):
         if column == 'termopar-temperatura':
             temperatura_calorimetro.rename(columns={column: 'T termopar'}, inplace=True)
 
-    temperatura_calorimetro['flow-time'] = temperatura_calorimetro['flow-time']*1000
+    temperatura_calorimetro['flow-time'] = temperatura_calorimetro['flow-time'] * 1000
 
     ax = temperatura_calorimetro.plot(x='flow-time', y=temperatura_calorimetro.columns[1], ax=ax,
                                       title='Temperatura no Termopar',
@@ -128,9 +127,9 @@ def plot_temperatura_calorimetro(file_name: str, ax: axes.Axes, ls='solid'):
                                       ylabel='Temperatura ($K$)',
                                       ls=ls,
                                       xlim=(0, max(temperatura_calorimetro['flow-time'])),
-                                    #   ylim=(250)
-    )
-                                    #   ylim=(0))
+                                      #   ylim=(250)
+                                      )
+    #   ylim=(0))
 
     ax.grid(b=True, which='major', ls='dashed', alpha=0.5)
     ax.grid(b=True, which='minor', ls='dotted', alpha=0.5)
@@ -143,7 +142,7 @@ def plot_temperatura_calorimetro(file_name: str, ax: axes.Axes, ls='solid'):
 def plot_energia_interna(file_name: str, ax: axes.Axes):
     temperatura_fluido = get_data_from_file(file_name)
     temperatura_fluido.rename(columns={'calorimetro_energia_interna': 'Energia Interna'}, inplace=True)
-    temperatura_fluido['flow-time'] = temperatura_fluido['flow-time']*1000
+    temperatura_fluido['flow-time'] = temperatura_fluido['flow-time'] * 1000
 
     x, y = 'flow-time', 'Energia Interna'
 
@@ -166,31 +165,31 @@ def calc_by_ASTM(df: pd.DataFrame):
     D = 3.339491
     E = 0.016389
 
-    mmol     = 63.546                # g/mol
-    massa    = 18                    # g
-    diametro = 4                     # cm
-    area     = np.pi*(diametro/2)**2 # cm^2
+    mmol = 63.546  # g/mol
+    massa = 18  # g
+    diametro = 4  # cm
+    area = np.pi * (diametro / 2) ** 2  # cm^2
     len_temp = len(df[df.columns[1]])
 
-    cp       = np.zeros(len_temp)
+    cp = np.zeros(len_temp)
     cp_medio = np.zeros(len_temp)
-    Q        = np.zeros(len_temp)
-    
+    Q = np.zeros(len_temp)
+
     tk = np.array(df[df.columns[1]])  # Temperatura em Kelvin
-    tc = tk - 273.15                  # Temperatura em Celsius
+    tc = tk - 273.15  # Temperatura em Celsius
 
     for i in range(0, len_temp):
-        tcp       = tk[i] / 1000
+        tcp = tk[i] / 1000
 
         # Correção do calor específico
-        cp[i] = (A + (B*tcp) + (C*(tcp**2)) + (D*(tcp**3)) + (E/(tcp**2))) / mmol
+        cp[i] = (A + (B * tcp) + (C * (tcp ** 2)) + (D * (tcp ** 3)) + (E / (tcp ** 2))) / mmol
 
         # Calor específico médio no intervalo considerado (cal/gºC)
         cp_medio[i] = (cp[0] + cp[i]) / 2
-        
+
         # Energia Incidente no intervalo considerado (cal/cm²)
         # Q  = g * cal/gºC * ºC / cm^2
-        Q[i] = (massa * cp_medio[i] * (tc[i]-tc[0]) / area * 0.239)
+        Q[i] = (massa * cp_medio[i] * (tc[i] - tc[0]) / area * 0.239)
 
     df['EI'] = Q
 
@@ -203,13 +202,13 @@ def calc_by_energia_interna(df: pd.DataFrame):
     cp = 381
 
     # Parâmetros do calorímetro
-    area_face = 1255.5 / (10**2)    # mm^2 -> cm^2
-    volume = 2010.6 / (1000**3)     # mm^3 -> m^3
-    massa = densidade * volume      # kg = kg/m^3 * m^3
+    area_face = 1255.5 / (10 ** 2)  # mm^2 -> cm^2
+    volume = 2010.6 / (1000 ** 3)  # mm^3 -> m^3
+    massa = densidade * volume  # kg = kg/m^3 * m^3
 
     massa_x_energia = [i * massa for i in df["calorimetro_energia_interna"]]
 
-    df['EI'] = [i/area_face * 0.239 for i in massa_x_energia]
+    df['EI'] = [i / area_face * 0.239 for i in massa_x_energia]
 
     return df
 
