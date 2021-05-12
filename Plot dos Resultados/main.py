@@ -107,8 +107,8 @@ def plot_temperatura_fluido(file_name: str, ax: axes.Axes):
     ax.grid(b=True, which='minor', ls='dotted', alpha=0.5)
     ax.xaxis.set_major_locator(MultipleLocator(10))
     ax.xaxis.set_minor_locator(MultipleLocator(5))
-    ax.yaxis.set_major_locator(MultipleLocator(20000))
-    ax.yaxis.set_minor_locator(MultipleLocator(10000))
+    ax.yaxis.set_major_locator(MultipleLocator(10000))
+    ax.yaxis.set_minor_locator(MultipleLocator(5000))
 
 
 def plot_temperatura_calorimetro(file_name: str, ax: axes.Axes, ls='solid'):
@@ -166,23 +166,31 @@ def calc_by_ASTM(df: pd.DataFrame):
     D = 3.339491
     E = 0.016389
 
-    mmol = 63.546                   # g/mol
-    massa = 18                      # g
-    diametro = 4                    # cm
-    area = np.pi*(diametro/2)**2    # cm^2
+    mmol     = 63.546                # g/mol
+    massa    = 18                    # g
+    diametro = 4                     # cm
+    area     = np.pi*(diametro/2)**2 # cm^2
+    len_temp = len(df[df.columns[1]])
 
+    cp       = np.zeros(len_temp)
+    cp_medio = np.zeros(len_temp)
+    Q        = np.zeros(len_temp)
+    
     tk = np.array(df[df.columns[1]])  # Temperatura em Kelvin
     tc = tk - 273.15                  # Temperatura em Celsius
 
-    cp = list()
-    cp_medio = list()
-    Q = list()
+    for i in range(0, len_temp):
+        tcp       = tk[i] / 1000
 
-    for i, T in enumerate(tk):
-        tcp = T/1000
-        cp.append((A + B*tcp + C*(tcp**2) + D*(tcp**3) + E/(tcp**2)) / mmol)
-        cp_medio.append(np.average([cp[0], cp[i]]))
-        Q.append((massa * cp_medio[i] * (tc[i] - tc[0])) / area * 0.239)
+        # Correção do calor específico
+        cp[i] = (A + (B*tcp) + (C*(tcp**2)) + (D*(tcp**3)) + (E/(tcp**2))) / mmol
+
+        # Calor específico médio no intervalo considerado (cal/gºC)
+        cp_medio[i] = (cp[0] + cp[i]) / 2
+        
+        # Energia Incidente no intervalo considerado (cal/cm²)
+        # Q  = g * cal/gºC * ºC / cm^2
+        Q[i] = (massa * cp_medio[i] * (tc[i]-tc[0]) / area * 0.239)
 
     df['EI'] = Q
 
