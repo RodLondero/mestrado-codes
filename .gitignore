@@ -1,6 +1,7 @@
 # Python folders
 __pycache__
 venv
+*.pyc
 
 # VSCode
 .vscode
