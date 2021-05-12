@@ -1,0 +1,5 @@
+CSOURCES= $(SRC)new_udf.c
+HSOURCES=
+VERSION=3ddp_node
+PARALLEL_NODE=ibmmpi
+GPU_SUPPORT=off

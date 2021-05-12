@@ -1,0 +1,10 @@
+
+333 -1
+
+6 3 -1
+
+"D:\Programas\AnsysEM\AnsysEM20.1\Win64\3dnms.exe"
+
+"D:\Rodolfo\Documentos\Github\Mestrado\Acoplamento Fluent-Maxwell\"
+
+"Setup1"
