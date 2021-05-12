@@ -1,8 +1,12 @@
 
 import pandas as pd
 import math
+import os
 
-results_directory = ".\\resultados\\"
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+results_directory = base_dir + "\\resultados\\"
+
 
 def get_data_from_file(file_name: str):
     """Get the data from a file
