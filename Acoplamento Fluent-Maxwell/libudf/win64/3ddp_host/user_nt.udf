@@ -1,0 +1,5 @@
+CSOURCES= $(SRC)new_udf.c
+HSOURCES=
+VERSION=3ddp_host
+PARALLEL_NODE=none
+GPU_SUPPORT=off

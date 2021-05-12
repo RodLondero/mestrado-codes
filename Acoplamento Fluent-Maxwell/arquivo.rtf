@@ -1,0 +1,306 @@
+{\rtf1\ansi\uc0\deff0{\fonttbl{\f0\fmodern\fprq1\fcharset0;}}{\colortbl;\red187\green187\blue187;\red64\green128\blue128;\red188\green122\blue0;\red0\green128\blue0;\red176\green0\blue64;\red102\green102\blue102;\red170\green34\blue255;\red0\green0\blue255;\red210\green65\blue58;\red25\green23\blue124;\red136\green0\blue0;\red160\green160\blue0;\red153\green153\blue153;\red125\green144\blue41;\red186\green33\blue33;\red187\green102\blue136;\red187\green102\blue34;\red0\green0\blue128;\red128\green0\blue128;\red160\green0\blue0;\red0\green160\blue0;\red255\green0\blue0;\red136\green136\blue136;\red0\green68\blue221;}\f0 {\cf2\i //#include "udf.h"\par
+}{\cf3 #}{\cf3 include} {\cf2\i "stdio.h"}{\cf3 \par
+}{\cf3 #}{\cf3 include} {\cf2\i "stdlib.h"}{\cf3 \par
+}{\cf3 #}{\cf3 include} {\cf2\i "string.h"}{\cf3 \par
+}{\cf3 #}{\cf3 include} {\cf2\i "math.h"}{\cf3 \par
+}{\cf3 #}{\cf3 include} {\cf2\i "ctype.h"}{\cf3 \par
+}\par
+{\cf3 #}{\cf3 define I_MAX 1000}{\cf3 \par
+}{\cf3 #}{\cf3 define PI 3.14159265358979323846}{\cf3 \par
+}{\cf3 #}{\cf3 define FREQ 60}{\cf3 \par
+}{\cf3 #}{\cf3 define DEFLEN 10}{\cf3 \par
+}{\cf3 #}{\cf3 define PHASES 1}{\cf3 \par
+}{\cf3 #}{\cf3 define BUFSIZ 512}{\cf3 \par
+}\par
+{\cf4\b typedef} {\cf4\b struct}\par
+\{\par
+	{\cf5 char} nome[BUFSIZ];\par
+	{\cf5 int} face_id;\par
+	{\cf5 double} valor;\par
+\} Excitacoes;\par
+\par
+{\cf4\b static} {\cf5 char} DELIMITER[] {\cf6 =} \{{\cf15 "}{\cf15     }{\cf15 "}\};\par
+{\cf4\b static} {\cf5 char} EXTENSAO[] {\cf6 =} \{{\cf15 "}{\cf15 .current}{\cf15 "}\};\par
+{\cf4\b static} {\cf5 char} INPUT_FILE_NAME[] {\cf6 =} \{{\cf15 "}{\cf15 input.txt}{\cf15 "}\};\par
+{\cf4\b static} {\cf5 char} EXCITACOES_IN_FILE_NAME[] {\cf6 =} \{{\cf15 "}{\cf15 excitacoes.in}{\cf15 "}\};\par
+{\cf4\b static} {\cf5 char} EXCITACOES_OUT_FILE_NAME[] {\cf6 =} \{{\cf15 "}{\cf15 excitacoes.out}{\cf15 "}\};\par
+{\cf4\b static} {\cf5 double} CURRENT_TIME {\cf6 =} {\cf6 12e-5};\par
+\par
+{\cf2\i //****************************************************************************************\par
+}{\cf2\i // Prot{\u243}tipo das fun{\u231}{\u245}es\par
+}{\cf2\i //**************************************************************************************** \par
+}\par
+{\cf2\i // Remove todas as ocorr{\u234}ncias do caractere contido em "garbage" na string passada em "*str"\par
+}{\cf5 void} {\cf8 removeChar}({\cf5 char} {\cf6 *}str, {\cf5 char} garbage);\par
+\par
+{\cf2\i // Converte todos os caracteres para min{\u250}sculo\par
+}{\cf5 char}{\cf6 *} {\cf8 toLower}({\cf5 char}{\cf6 *} s);\par
+\par
+{\cf2\i // Obt{\u233}m o caminho do arquivo .current, buscando o local de acomplamento em input.txt\par
+}{\cf5 char}{\cf6 *} {\cf8 getPath}();\par
+\par
+{\cf2\i // Obt{\u233}m as excita{\u231}{\u245}es que ser{\u227}o consideradas (devem existir os arquivos excitacoes.in e excitacoes.out)\par
+}{\cf5 void} {\cf8 getExcitacoes}(Excitacoes {\cf6 *}ex, {\cf5 int} in_out);\par
+\par
+{\cf2\i // Calcula as novas correntes CA\par
+}{\cf5 void} {\cf8 calculaCorrente}(Excitacoes {\cf6 *}excitacao);\par
+\par
+{\cf2\i // Le o arquivo .current atual\par
+}{\cf5 void} {\cf8 lerCurrentAtual}();\par
+\par
+{\cf2\i //****************************************************************************************\par
+}{\cf2\i // Fun{\u231}{\u245}es\par
+}{\cf2\i //**************************************************************************************** \par
+}{\cf5 void} {\cf8 removeChar}({\cf5 char} {\cf6 *}str, {\cf5 char} garbage) \par
+\{\par
+    {\cf5 char} {\cf6 *}src, {\cf6 *}dst;\par
+    {\cf4\b for} (src {\cf6 =} dst {\cf6 =} str; {\cf6 *}src {\cf6 !}{\cf6 =} {\cf15 '}{\cf15 \\0}{\cf15 '}; src{\cf6 +}{\cf6 +}) \par
+    \{\par
+        {\cf6 *}dst {\cf6 =} {\cf6 *}src;\par
+        {\cf4\b if} ({\cf6 *}dst {\cf6 !}{\cf6 =} garbage) dst{\cf6 +}{\cf6 +};\par
+    \}\par
+    {\cf6 *}dst {\cf6 =} {\cf15 '}{\cf15 \\0}{\cf15 '};\par
+\}\par
+\par
+{\cf5 char}{\cf6 *} {\cf8 toLower}({\cf5 char}{\cf6 *} s) \{\par
+    {\cf4\b for}({\cf5 char} {\cf6 *}p{\cf6 =}s; {\cf6 *}p; p{\cf6 +}{\cf6 +}) {\cf6 *}p{\cf6 =}tolower({\cf6 *}p);\par
+    {\cf4\b return} s;\par
+\}\par
+\par
+{\cf5 char}{\cf6 *} {\cf8 getPath}()\par
+\{\par
+    {\cf4\b static} {\cf5 char} path[BUFSIZ];\par
+    {\cf5 char} linha[BUFSIZ];\par
+    {\cf5 char} conteudo[{\cf6 5}][BUFSIZ];\par
+    {\cf5 int} i, j;\par
+\par
+    printf({\cf15 "}{\cf17\b \\n}{\cf15 Buscando o caminho do arquivo .current em %s}{\cf15 "}, INPUT_FILE_NAME);\par
+\par
+    {\cf5 FILE}{\cf6 *} arquivo {\cf6 =} fopen(INPUT_FILE_NAME, {\cf15 "}{\cf15 r}{\cf15 "});\par
+    \par
+    {\cf4\b if}(arquivo {\cf6 =}{\cf6 =} {\cf4 NULL})\par
+        {\cf4\b return} {\cf6 0};   \par
+\par
+    i {\cf6 =} {\cf6 0}; j {\cf6 =} {\cf6 0};\par
+    {\cf4\b while}(fgets(linha, {\cf4\b sizeof}(linha), arquivo) {\cf6 !}{\cf6 =} {\cf4 NULL}) \par
+    \{\par
+        {\cf4\b if} (i {\cf6 %} {\cf6 2} {\cf6 !}{\cf6 =} {\cf6 0})\par
+        \{\par
+            removeChar(linha, {\cf15 '}{\cf15 \\n}{\cf15 '});\par
+            removeChar(linha, {\cf15 '}{\cf15 \\"}{\cf15 '});\par
+            strcpy(conteudo[j], linha);            \par
+            j{\cf6 +}{\cf6 +};\par
+        \}\par
+		i{\cf6 +}{\cf6 +};\par
+    \}\par
+    fclose(arquivo);\par
+\par
+    strcpy(path, conteudo[{\cf6 3}]);\par
+    strcat(path, {\cf15 "}{\cf17\b \\\\}{\cf15 "});\par
+    strcat(path, conteudo[{\cf6 4}]);\par
+    strcat(path, EXTENSAO);\par
+\par
+    {\cf4\b return} path;\par
+\}\par
+\par
+{\cf5 void} {\cf8 getExcitacoes}(Excitacoes {\cf6 *}ex, {\cf5 int} in_out)\par
+\{\par
+    {\cf5 char} linha[BUFSIZ];\par
+    {\cf5 FILE}{\cf6 *} arquivo;\par
+    {\cf5 int} i {\cf6 =} {\cf6 0};\par
+\par
+    {\cf4\b if} (in_out {\cf6 =}{\cf6 =} {\cf6 0})\par
+        arquivo {\cf6 =} fopen(EXCITACOES_IN_FILE_NAME, {\cf15 "}{\cf15 r}{\cf15 "});\par
+    {\cf4\b else} {\cf4\b if}(in_out {\cf6 =}{\cf6 =} {\cf6 1})\par
+        arquivo {\cf6 =} fopen(EXCITACOES_OUT_FILE_NAME, {\cf15 "}{\cf15 r}{\cf15 "});\par
+\par
+    {\cf4\b while}(fgets(linha, BUFSIZ, arquivo) {\cf6 !}{\cf6 =} {\cf4 NULL})\par
+    \{\par
+        removeChar(linha, {\cf15 '}{\cf15 \\n}{\cf15 '});\par
+        removeChar(linha, {\cf15 '}{\cf15  }{\cf15 '});\par
+        strcpy(ex[i].nome, linha);    \par
+        i{\cf6 +}{\cf6 +};\par
+    \}\par
+    fclose(arquivo);\par
+\}\par
+\par
+{\cf5 void} {\cf8 calculaCorrente}(Excitacoes {\cf6 *}excitacao)\par
+\{\par
+    {\cf5 double} t {\cf6 =} CURRENT_TIME;\par
+    {\cf5 double} wt {\cf6 =} {\cf6 2} {\cf6 *} PI {\cf6 *} FREQ {\cf6 *} t;\par
+    {\cf5 double} corrente[PHASES] {\cf6 =} \{{\cf6 0}\};\par
+    {\cf5 char} nome[BUFSIZ] {\cf6 =} \{{\cf15 "}{\cf15 "}\}, {\cf6 *}token;\par
+    \par
+    printf({\cf15 "}{\cf17\b \\n}{\cf17\b \\n}{\cf15 Calculando as novas correntes...}{\cf15 "});\par
+\par
+	excitacao[{\cf6 0}].valor {\cf6 =} I_MAX {\cf6 *} sin(wt);\par
+    {\cf4\b if} (PHASES {\cf6 =}{\cf6 =} {\cf6 2})\par
+        excitacao[{\cf6 1}].valor {\cf6 =} I_MAX {\cf6 *} sin(wt {\cf6 -} PI);\par
+    {\cf4\b if} (PHASES {\cf6 =}{\cf6 =} {\cf6 3})\par
+    \{\par
+        excitacao[{\cf6 1}].valor {\cf6 =} I_MAX {\cf6 *} sin(wt {\cf6 -} {\cf6 2}{\cf6 *}PI{\cf6 /}{\cf6 3});\par
+        excitacao[{\cf6 2}].valor {\cf6 =} I_MAX {\cf6 *} sin(wt {\cf6 +} {\cf6 2}{\cf6 *}PI{\cf6 /}{\cf6 3});\par
+    \}\par
+\}\par
+\par
+{\cf2\i //DEFINE_ON_DEMAND(ler_current_atual)\par
+}{\cf5 void} {\cf8 lerCurrentAtual}()\par
+\{\par
+{\cf3 #}{\cf3 if !RP_NODE}{\cf3 \par
+}    {\cf5 char}{\cf6 *} path_current {\cf6 =} getPath();\par
+    {\cf5 char} linha[BUFSIZ] {\cf6 =} \{{\cf15 "}{\cf15 "}\}, conteudo_in_current[DEFLEN][BUFSIZ] {\cf6 =} \{{\cf15 "}{\cf15 "}\};\par
+    {\cf5 char} {\cf6 *}token;\par
+\par
+    printf({\cf15 "}{\cf17\b \\n}{\cf15 Abrindo o arquivo %s}{\cf15 "}, path_current);\par
+    {\cf5 FILE}{\cf6 *} arquivo_current {\cf6 =} fopen(path_current, {\cf15 "}{\cf15 r}{\cf15 "});\par
+\par
+    {\cf4\b if} (arquivo_current {\cf6 !}{\cf6 =} {\cf4 NULL})\par
+    \{\par
+        printf({\cf15 "}{\cf17\b \\n}{\cf15 Lendo o arquivo %s}{\cf15 "}, path_current);\par
+        printf({\cf15 "}{\cf17\b \\n}{\cf15  setup1.current ATUAL:}{\cf17\b \\n}{\cf15 "});\par
+\par
+        {\cf4\b while}( fgets(linha, BUFSIZ, arquivo_current) {\cf6 !}{\cf6 =} {\cf4 NULL} )\par
+            printf({\cf15 "}{\cf17\b \\t}{\cf15 %s}{\cf15 "}, linha);\par
+\par
+        fclose(arquivo_current);\par
+    \}    \par
+    {\cf4\b else}\par
+        printf({\cf15 "}{\cf17\b \\n}{\cf15 N{\u227}o foi poss{\u237}vel abrir o arquivo %s}{\cf15 "}, path_current);\par
+{\cf3 #}{\cf3 endif}{\cf3 \par
+}\}\par
+\par
+{\cf2\i //****************************************************************************************\par
+}{\cf2\i // Main\par
+}{\cf2\i //**************************************************************************************** \par
+}{\cf2\i //DEFINE_ON_DEMAND(Atualiza_corrente_Demand)\par
+}{\cf5 int} {\cf8 main}()\par
+\{\par
+{\cf3 #}{\cf3 if !RP_NODE}{\cf3 \par
+}\par
+    {\cf5 char}{\cf6 *} path_current;\par
+    {\cf5 char} linha[BUFSIZ] {\cf6 =} \{{\cf15 "}{\cf15 "}\}, conteudo_in_current[DEFLEN][BUFSIZ] {\cf6 =} \{{\cf15 "}{\cf15 "}\};\par
+    {\cf5 char} {\cf6 *}token, buffer[BUFSIZ] {\cf6 =} \{{\cf15 "}{\cf15 "}\}, tmp[BUFSIZ] {\cf6 =} \{{\cf15 "}{\cf15 "}\};\par
+    {\cf5 int} n_linhas_in_current {\cf6 =} {\cf6 0}, i, j;\par
+\par
+    path_current {\cf6 =} getPath();\par
+\par
+    {\cf4\b if}(path_current)\par
+    \{\par
+        {\cf2\i //printf("\\nDeclara{\u231}{\u227}o das Excita{\u231}{\u245}es");\par
+}        Excitacoes ex_in[PHASES]  {\cf6 =} \{{\cf15 "}{\cf15 "}, {\cf6 0}, {\cf6 0}\};\par
+        Excitacoes ex_out[PHASES] {\cf6 =} \{{\cf15 "}{\cf15 "}, {\cf6 0}, {\cf6 0}\};\par
+        Excitacoes ex[DEFLEN] {\cf6 =} \{{\cf15 "}{\cf15 "}, {\cf6 0}, {\cf6 0}\};\par
+\par
+        printf({\cf15 "}{\cf17\b \\n}{\cf15 Buscando excita{\u231}{\u245}es de entrada...}{\cf15 "});\par
+        getExcitacoes(ex_in, {\cf6 0});\par
+\par
+        printf({\cf15 "}{\cf17\b \\n}{\cf15 Buscando excita{\u231}{\u245}es de sa{\u237}da...}{\cf15 "});\par
+        getExcitacoes(ex_out, {\cf6 1});\par
+\par
+        printf({\cf15 "}{\cf17\b \\n}{\cf15 Abrindo o arquivo}{\cf17\b \\t}{\cf15  %s}{\cf15 "}, path_current);\par
+\par
+        {\cf5 FILE}{\cf6 *} arquivo_current {\cf6 =} fopen(path_current, {\cf15 "}{\cf15 r}{\cf15 "});\par
+\par
+        {\cf4\b if} (arquivo_current {\cf6 !}{\cf6 =} {\cf4 NULL})\par
+        \{\par
+            {\cf2\i // Obt{\u233}m o conte{\u250}do do arquivo Setup1.current\par
+}            printf({\cf15 "}{\cf17\b \\n}{\cf15 Lendo o arquivo}{\cf17\b \\t}{\cf15  %s}{\cf15 "}, path_current);\par
+            \par
+            fgets(linha, BUFSIZ, arquivo_current);\par
+            n_linhas_in_current {\cf6 =} atoi(linha);\par
+            \par
+            i {\cf6 =} {\cf6 0};\par
+            {\cf4\b while}( fgets(linha, BUFSIZ, arquivo_current) {\cf6 !}{\cf6 =} {\cf4 NULL} )\par
+            \{\par
+                removeChar(linha, {\cf15 '}{\cf15 \\n}{\cf15 '});                {\cf2\i // Remove a quebra de linha do final\par
+}                strcpy(conteudo_in_current[i], linha);  {\cf2\i // Salva o conte{\u250}do da linha\par
+}                i{\cf6 +}{\cf6 +};   \par
+            \}\par
+            fclose(arquivo_current);\par
+\par
+            {\cf2\i // Exibe o conte{\u250}do do .current atual\par
+}            printf({\cf15 "}{\cf17\b \\n}{\cf17\b \\n}{\cf17\b \\t}{\cf15 setup1.current ATUAL:}{\cf15 "});\par
+            printf({\cf15 "}{\cf17\b \\n}{\cf17\b \\t}{\cf15 %d}{\cf15 "}, n_linhas_in_current);\par
+\par
+            {\cf4\b for}(i {\cf6 =} {\cf6 0}; i {\cf6 <} n_linhas_in_current; i{\cf6 +}{\cf6 +})\par
+            \{			\par
+                token {\cf6 =} strtok(conteudo_in_current[i], DELIMITER); {\cf2\i // Faz um split da linha\par
+}                \par
+                strcpy(ex[i].nome, token);          {\cf2\i // Salva o nome \par
+}                strcpy(buffer, ex[i].nome);         {\cf2\i // Salva o nome para edi{\u231}{\u227}o\par
+}\par
+                token {\cf6 =} strtok({\cf4 NULL}, DELIMITER);    {\cf2\i // Obt{\u233}m o ID da face\par
+}                ex[i].face_id {\cf6 =} atoi(token);        {\cf2\i // Converte para inteiro e salva\par
+}                \par
+                token {\cf6 =} strtok({\cf4 NULL}, DELIMITER);    {\cf2\i // Obt{\u233}m o valor \par
+}                ex[i].valor {\cf6 =} strtod(token, {\cf4 NULL});  {\cf2\i // Converte para float e salva\par
+}                \par
+                printf({\cf15 "}{\cf17\b \\n}{\cf17\b \\t}{\cf15 %s}{\cf15 "}, ex[i].nome);\par
+                printf({\cf15 "}{\cf17\b \\t}{\cf15 %d}{\cf15 "}, ex[i].face_id);\par
+                printf({\cf15 "}{\cf17\b \\t}{\cf15 %f}{\cf15 "}, ex[i].valor);\par
+            \}\par
+\par
+            {\cf2\i // Calculo das correntes\par
+}            calculaCorrente(ex_in);\par
+\par
+            {\cf5 char} split[{\cf6 3}][BUFSIZ] {\cf6 =} \{{\cf15 "}{\cf15 "}\};\par
+        \par
+            {\cf4\b for}(i{\cf6 =}{\cf6 0}; i{\cf6 <}PHASES; i{\cf6 +}{\cf6 +})\par
+            \{\par
+                strcpy(buffer, ex_in[i].nome);\par
+                strcpy(buffer, toLower(buffer));\par
+                \par
+                token {\cf6 =} strtok(buffer, {\cf15 "}{\cf15 _}{\cf15 "});\par
+                j {\cf6 =} {\cf6 0};\par
+                {\cf4\b while} (token {\cf6 !}{\cf6 =} {\cf4 NULL})\par
+                \{\par
+                    strcpy(split[j], token);\par
+                    token {\cf6 =} strtok({\cf4 NULL}, {\cf15 "}{\cf15 _}{\cf15 "});\par
+                    j{\cf6 +}{\cf6 +};\par
+                \}\par
+                \par
+                sprintf(buffer, {\cf15 "}{\cf15 %s_out_%s}{\cf15 "}, split[{\cf6 0}], split[{\cf6 2}]);\par
+                {\cf4\b for}(j{\cf6 =}{\cf6 0}; j{\cf6 <}PHASES; j{\cf6 +}{\cf6 +})\par
+                \{\par
+                    strcpy(tmp, ex_out[j].nome);\par
+                    {\cf4\b if} (strstr(toLower(tmp), buffer))\par
+                        ex_out[j].valor {\cf6 =} ex_in[j].valor;\par
+                \}\par
+            \}\par
+\par
+            {\cf4\b for} (i{\cf6 =}{\cf6 0}; i{\cf6 <}n_linhas_in_current; i{\cf6 +}{\cf6 +})\par
+            \{\par
+                {\cf4\b for}(j{\cf6 =}{\cf6 0}; j {\cf6 <} PHASES; j{\cf6 +}{\cf6 +})\par
+                \{\par
+                    {\cf4\b if} ({\cf6 !}strcmp(ex[i].nome, ex_in[j].nome))\par
+                        ex[i].valor {\cf6 =} ex_in[j].valor;\par
+                    {\cf4\b else} {\cf4\b if} ({\cf6 !}strcmp(ex[i].nome, ex_out[j].nome))\par
+                        ex[i].valor {\cf6 =} ex_out[j].valor;\par
+                \}\par
+            \}\par
+\par
+            {\cf2\i // Escreve no arquivo .current\par
+}            arquivo_current {\cf6 =} fopen(path_current, {\cf15 "}{\cf15 w+}{\cf15 "});\par
+            fprintf(arquivo_current, {\cf15 "}{\cf15 %d}{\cf17\b \\n}{\cf15 "}, n_linhas_in_current);\par
+            \par
+            printf({\cf15 "}{\cf17\b \\n}{\cf17\b \\n}{\cf17\b \\t}{\cf15 setup1.current NOVO:}{\cf15 "});\par
+            printf({\cf15 "}{\cf17\b \\n}{\cf17\b \\t}{\cf15 %d}{\cf15 "}, n_linhas_in_current);\par
+            \par
+            {\cf4\b for} (i{\cf6 =}{\cf6 0}; i {\cf6 <} n_linhas_in_current; i{\cf6 +}{\cf6 +})\par
+            \{	\par
+                fprintf(arquivo_current, {\cf15 "}{\cf15 %s%s%d%s%f}{\cf17\b \\n}{\cf15 "}, ex[i].nome, DELIMITER, ex[i].face_id, DELIMITER, ex[i].valor);\par
+                printf({\cf15 "}{\cf17\b \\n}{\cf17\b \\t}{\cf15 %s}{\cf17\b \\t}{\cf15 %d}{\cf17\b \\t}{\cf15 %f}{\cf15 "}, ex[i].nome, ex[i].face_id, ex[i].valor);\par
+            \}\par
+            \par
+            fclose(arquivo_current);\par
+            \par
+            printf({\cf15 "}{\cf17\b \\n}{\cf17\b \\n}{\cf15 Time: %f}{\cf17\b \\n}{\cf15 "}, CURRENT_TIME);\par
+        \}\par
+        {\cf4\b else}\par
+            printf({\cf15 "}{\cf17\b \\n}{\cf15 N{\u227}o foi poss{\u237}vel abrir o arquivo %s}{\cf15 "}, path_current);   \par
+    \}\par
+    {\cf4\b else}\par
+        printf({\cf15 "}{\cf17\b \\n}{\cf15 N{\u227}o foi poss{\u237}vel ler o arquivo %s.}{\cf15 "}, INPUT_FILE_NAME);\par
+{\cf3 #}{\cf3 endif}{\cf3 \par
+}\}\par
+}
