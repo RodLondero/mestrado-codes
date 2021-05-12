@@ -4,3 +4,6 @@ venv
 
 # VSCode
 .vscode
+
+# Pycharm
+.idea
