@@ -1,0 +1,4 @@
+; Create a bounding box to refinement
+/boundary/create-bounding-box origin-wall_eletrodo_a origin-wall_eletrodo_b origin-wall_eletrodo_c () wrapper wrapper-eletrodos 4 relative -150 30 50 50 30 50 no
+/objects/create wrapper-eletrodos fluid 11 wrapper-eletrodos () () geom
+/objects/labels/create wrapper-eletrodos wrapper-eletrodos () wrapper-eletrodos
