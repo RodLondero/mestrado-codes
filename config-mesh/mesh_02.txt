@@ -2,3 +2,15 @@
 /boundary/create-bounding-box origin-wall_eletrodo_a origin-wall_eletrodo_b origin-wall_eletrodo_c () wrapper wrapper-eletrodos 4 relative -150 30 50 50 30 50 no
 /objects/create wrapper-eletrodos fluid 11 wrapper-eletrodos () () geom
 /objects/labels/create wrapper-eletrodos wrapper-eletrodos () wrapper-eletrodos
+;
+; Merge Boundaries
+/boundary/manage/merge interface_calorimetro_isolante isolante:1861 () first-zone
+;
+; Rename Boundaries
+/boundary/manage/name fluido:1946 interface_calorimetro_fluido_back
+/boundary/manage/name interior--fluido  interior-fluido
+/boundary/manage/name interior--calorimetro interior-calorimetro
+/boundary/manage/name interior--eletrodo_a interior-eletrodo_a
+/boundary/manage/name interior--eletrodo_b interior-eletrodo_b
+/boundary/manage/name interior--eletrodo_c interior-eletrodo_c
+/boundary/manage/name interior--isolante interior-isolante
