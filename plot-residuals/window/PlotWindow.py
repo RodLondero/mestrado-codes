@@ -28,11 +28,11 @@ class PlotWindow(QMainWindow):
         self.setCentralWidget(self.centralWidget)
 
         self.labelDlg = QLabel(self.centralWidget)
-        self.labelDlg.setGeometry(QRect(40, 10, 180, 30))
+        self.labelDlg.setGeometry(QRect(40, 10, 220, 30))
         self.labelDlg.setText("Selecione o diretório dos resultados: ")
 
         self.btnOpenFile = QPushButton(self.centralWidget)
-        self.btnOpenFile.setGeometry(QRect(220, 10, 40, 30))
+        self.btnOpenFile.setGeometry(QRect(250, 10, 40, 30))
         self.btnOpenFile.setObjectName("btnFileDialog")
         self.btnOpenFile.setText("..")
         self.btnOpenFile.clicked.connect(self.getFolder)
@@ -57,12 +57,12 @@ class PlotWindow(QMainWindow):
         self.button.clicked.connect(self.click)
 
         self.checkBoxSalvarHTML = QCheckBox(self.centralWidget)
-        self.checkBoxSalvarHTML.setGeometry(QRect(40, 120, 80, 30))
+        self.checkBoxSalvarHTML.setGeometry(QRect(40, 120, 100, 30))
         self.checkBoxSalvarHTML.setText("Salvar HTML")
         self.checkBoxSalvarHTML.stateChanged.connect(self.checkBoxChangeAction)
         
         self.checkBoxSalvarCSV = QCheckBox(self.centralWidget)
-        self.checkBoxSalvarCSV.setGeometry(QRect(150, 120, 80, 30))
+        self.checkBoxSalvarCSV.setGeometry(QRect(150, 120, 90, 30))
         self.checkBoxSalvarCSV.setText("Salvar CSV")
         self.checkBoxSalvarCSV.stateChanged.connect(self.checkBoxChangeAction)
         
@@ -72,11 +72,11 @@ class PlotWindow(QMainWindow):
         self.labelSaveFile.hide()
         
         self.textPathtoSave = QTextEdit(self.centralWidget)
-        self.textPathtoSave.setGeometry(QRect(40, 180, 340, 25))
+        self.textPathtoSave.setGeometry(QRect(40, 180, 340, 30))
         self.textPathtoSave.setObjectName("editPathtoSave")
         
         self.btnOpenFiletoSave = QPushButton(self.centralWidget)
-        self.btnOpenFiletoSave.setGeometry(QRect(380, 180, 40, 25))
+        self.btnOpenFiletoSave.setGeometry(QRect(380, 180, 40, 30))
         self.btnOpenFiletoSave.setObjectName("btnOpenFiletoSave")
         self.btnOpenFiletoSave.setText("..")
         self.btnOpenFiletoSave.clicked.connect(self.getFoldertoSave)
