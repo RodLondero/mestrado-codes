@@ -1,8 +1,8 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from window.PlotWindow import App
+from core.window import App
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    ex = App()
+    ex = App(csv_decimal=".")
     sys.exit(app.exec_())
