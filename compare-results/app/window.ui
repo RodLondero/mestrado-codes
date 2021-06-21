@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>635</width>
+    <height>425</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1</width>
+    <height>1</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1000</width>
+    <height>1000</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <widget class="QListWidget" name="listWidget">
+    <property name="geometry">
+     <rect>
+      <x>14</x>
+      <y>121</y>
+      <width>301</width>
+      <height>191</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>14</x>
+      <y>7</y>
+      <width>251</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Arquivo 1:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>7</y>
+      <width>251</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Arquivo 2:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit2">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>30</y>
+      <width>251</width>
+      <height>24</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit">
+    <property name="geometry">
+     <rect>
+      <x>14</x>
+      <y>32</y>
+      <width>251</width>
+      <height>24</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnFileDialog1">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>31</y>
+      <width>41</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>...</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnFileDialog2">
+    <property name="geometry">
+     <rect>
+      <x>579</x>
+      <y>30</y>
+      <width>41</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>...</string>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="listWidget2">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>120</y>
+      <width>301</width>
+      <height>192</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnPlot">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>320</y>
+      <width>191</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Plotar</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBoxSep1">
+    <property name="geometry">
+     <rect>
+      <x>14</x>
+      <y>80</y>
+      <width>101</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Espaço</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>;</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>,</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>14</x>
+      <y>60</y>
+      <width>141</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Separador</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>60</y>
+      <width>141</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Decimal</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBoxDecimal1">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>80</y>
+      <width>80</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>.</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>,</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QPushButton" name="btnAbrir1">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>79</y>
+      <width>90</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Abrir</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>436</x>
+      <y>60</y>
+      <width>141</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Decimal</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnAbrir2">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>80</y>
+      <width>90</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Abrir</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>60</y>
+      <width>141</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Separador</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBoxSep2">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>80</y>
+      <width>101</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Espaço</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>;</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>,</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QComboBox" name="comboBoxDecimal2">
+    <property name="geometry">
+     <rect>
+      <x>436</x>
+      <y>80</y>
+      <width>80</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>.</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>,</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxHTML">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>330</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Salvar HTML</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxCSV">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>330</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Salvar CSV</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxPDF">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>330</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Salvar PDF</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxSVG">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>330</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Salvar SVG</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>635</width>
+     <height>26</height>
+    </rect>
+   </property>
+  </widget>
+  <action name="actionclique">
+   <property name="text">
+    <string>clique</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
