@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import math 
+import math, os
 
 from matplotlib.ticker import (MultipleLocator)
 import matplotlib.axes._axes as axes
@@ -94,11 +94,46 @@ class Executar():
         ax.grid(b=True, which='major', ls='dashed', alpha=0.5)
         ax.grid(b=True, which='minor', ls='dotted', alpha=0.5)
 
-    def read_file(self):
-        self.df = pd.read_csv(self.file_path, sep=self.csv_sep, decimal=self.csv_decimal)
-
     def get_max_EI(self):
         return self.df['EI'].max()
+
+    def read_file(self):
+        _, file_extension = os.path.splitext(self.file_path)
+
+        if file_extension == ".csv":
+            self.df = pd.read_csv(self.file_path, sep=self.csv_sep, decimal=self.csv_decimal)   # type: pd.DataFrame
+        elif file_extension == ".out":
+            self.df = self.readOutFile(self.file_path)
+
+    def readOutFile(self, filename: str):
+
+        with open(filename, 'r') as f:
+            content = f.read().splitlines()
+
+            # Get title
+            title = content[0].strip('"')
+
+            # Remove the second line of the file
+            content.pop(1)
+
+            # Get columns
+            columns = content[1].strip("()\n").split('"')
+            for i, val in enumerate(columns):
+                if val.strip() == '':
+                    columns.pop(i)
+
+            # Format values to Float
+            for i in range(0, len(content[2:])):
+                line = content[2:][i].strip('\n').split(' ')
+                line = [float(item) for item in line]
+
+                content[i + 2] = line
+
+        dataframe = pd.DataFrame(content[2:], columns=columns)
+        # dataframe = dataframe.set_index('Time Step')
+        dataframe.name = title
+
+        return dataframe
 
 def round_up(n, decimals=0):
     multiplier = 10 ** decimals
