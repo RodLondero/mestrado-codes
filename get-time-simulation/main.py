@@ -21,11 +21,21 @@ def get_time_from_file(path):
         check_pattern(pattern_minutes, line, t_min)
         check_pattern(pattern_hour, line, t_h)
 
+    columns = ['t_sec', 't_min', 't_h']
+
+    df = pd.DataFrame(list(zip(t_sec, t_min, t_h)), columns=columns)
     # print(f"Total seconds: {sum(t_sec)}")
     # print(f"Total minutes: {sum(t_min)}")
     # print(f"Total hours: {sum(t_h)}")
     
+    print("Total")
+    print(df.sum())
+
+    print("\nMédia")
+    print(df.mean())
+
     print("Fim")
+    
 def check_pattern(pattern: str, line: str, lista: list):
     for match in re.finditer(pattern, line):
         lista.append(float(match.group().strip().split()[-2]))
