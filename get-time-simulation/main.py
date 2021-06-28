@@ -5,6 +5,21 @@ import plotly.express as px
 import re
 from pprint import pprint
 
+import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
+from PyQt5.QtGui import QIcon
+
+class App(QWidget):
+
+    def __init__(self):
+        super().__init__() 
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","Transcript Files (*.trn);;All Files (*)", options=options)
+        if fileName:
+            print(get_time_from_file(fileName))       
+
+
 def get_time_from_file(path):
     filename, extension = os.path.splitext(path)
     
@@ -45,5 +60,10 @@ if __name__ == '__main__':
 
     diretorio = os.path.dirname(__file__)
     path = os.path.join(diretorio, "_HOA_4.16kV_Malha_01_300_pontos_init.trn")
+    
+    app = QApplication(sys.argv)
+    ex = App()
+    sys.exit(app.exec_())
+
 
     get_time_from_file(path=path)
