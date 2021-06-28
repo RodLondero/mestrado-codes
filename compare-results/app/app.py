@@ -16,7 +16,7 @@ class Ui(QMainWindow):
         # Call the inherited classes __init__ method
         super(Ui, self).__init__()
         uic.loadUi(f'{pathdir}/window.ui', self)  # Load the .ui file
-
+        
         # Edits
         self.lineEdit          = self.findChild(QLineEdit, 'lineEdit')          # type: QLineEdit
         self.lineEdit2         = self.findChild(QLineEdit, 'lineEdit2')         # type: QLineEdit
@@ -60,7 +60,7 @@ class Ui(QMainWindow):
         self.setMinimumSize(635, 385)
         self.setFixedSize(635, 385)
         self.setWindowTitle('Comparação de resultados')
-
+        
         self.filename1 = None
         self.filename2 = None
 
@@ -228,7 +228,7 @@ class Ui(QMainWindow):
             if self.filename2:
                 name += "_" + self.filename2
             
-            dialog = QInputDialog() # type: QInputDiaglo
+            dialog = QInputDialog() # type: QInputDialog
             text, ok = dialog.getText(self, 'Nome do arquivo', 'Insira um nome para salvar o arquivo', text=name)
             if ok:
                 name = text
