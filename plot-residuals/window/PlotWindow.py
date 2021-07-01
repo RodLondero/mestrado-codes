@@ -14,9 +14,10 @@ class PlotWindow(QMainWindow):
         # self.setStyle(QStyleFactory.create("Oxygen"))
         self.setMinimumSize(QSize(440, 160))
         self.setWindowTitle("Plot Ansys Fluent Reports")
+       
+        self.results_directory = os.path.dirname(os.path.abspath(__file__))
+        self.results_directory = ".\\"
         
-        self.base_dir = os.path.dirname(os.path.abspath(__file__))
-        self.results_directory = self.base_dir  # + "\\..\\resultados\\"
         self.files = []
         self.file_extension = ".trn"
 
