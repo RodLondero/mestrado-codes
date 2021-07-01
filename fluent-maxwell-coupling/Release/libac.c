@@ -5,8 +5,11 @@
 #include "math.h"
 //#include "ctype.h"
 
-#define I_MAX 10000
-#define PHASES 1
+#define I_MAX_DEFAULT 10e3
+#define PHASES_MONO 1
+#define PHASES_BI 2
+#define PHASES_TRI 3
+#define PHASES_DEFAULT 3
 #define FREQ 60
 
 #define DEFLEN 10
@@ -16,10 +19,12 @@
 static char DELIMITER[] = {"    "};
 static char EXTENSAO[] = {".current"};
 static char INPUT_FILE_NAME[] = {"input.txt"};
-static char EXCITACOES_IN_FILE_NAME[] = {"excitacoes.in"};
-static char EXCITACOES_OUT_FILE_NAME[] = {"excitacoes.out"};
-static char LOG_FILE_NAME[] = {"logs/log_current.txt"};
+static char EXCITACOES_IN_FILE_NAME[] = {"_excitacoes.in"};
+static char EXCITACOES_OUT_FILE_NAME[] = {"_excitacoes.out"};
+static char LOG_FILE_NAME[] = {"_log_current.txt"};
 //static double CURRENT_TIME = 12e-5;
+real I_MAX = I_MAX_DEFAULT;
+int PHASES = 3;
 
 typedef struct
 {
@@ -43,7 +48,7 @@ char* getPath()
 {
     static char path[BUFSIZ];
     char linha[BUFSIZ];
-    char conteudo[5][BUFSIZ];
+    char conteudo[10][BUFSIZ];
     int i, j;
 
     Message("\nBuscando o caminho do arquivo .current em %s", INPUT_FILE_NAME);
@@ -67,9 +72,24 @@ char* getPath()
     fclose(arquivo);
 
     strcpy(path, conteudo[3]);
-    strcat(path, "\\");
+    // strcat(path, "\\");
     strcat(path, conteudo[4]);
     strcat(path, EXTENSAO);
+
+    removeChar(conteudo[5], ' ');
+    if (strlen(conteudo[5]) > 0)
+        I_MAX = strtod(conteudo[5], NULL);
+    else
+        I_MAX = I_MAX_DEFAULT;
+
+    removeChar(conteudo[6], ' ');
+    if (strlen(conteudo[6]) > 0)
+        PHASES = atoi(conteudo[6]);
+    else
+        PHASES = PHASES_DEFAULT;
+
+    Message("\n\nImax: %f", I_MAX);
+    Message("\nPhases: %d\n", PHASES);
 
     return path;
 }
@@ -89,7 +109,7 @@ void getExcitacoes(Excitacoes *ex, int in_out)
     {
         removeChar(linha, '\n');
         removeChar(linha, ' ');
-        strcpy(ex[i].nome, linha);    
+        strcpy(ex[i].nome, linha);
         i++;
     }
     fclose(arquivo);
@@ -99,8 +119,11 @@ void calculaCorrente(Excitacoes *excitacao)
 {
     double t = CURRENT_TIME;
     double wt = 2 * PI * FREQ * t;
-    double corrente[PHASES] = {0};
     char nome[BUFSIZ] = {""}, *token;
+
+    double *corrente = (double *)malloc(PHASES * sizeof(double));    
+    for (int i = 0; i < PHASES; i++)
+        corrente[i] = 0;
 
     Message("\n\nCalculando as novas correntes...");
 
@@ -133,13 +156,12 @@ void setCorrente()
     if(path_current)
     {
         //Message("\nDeclaração das Excitações");
-        Excitacoes ex_in[PHASES]  = {"", 0, 0};
-        Excitacoes ex_out[PHASES] = {"", 0, 0};
-        Excitacoes ex[DEFLEN] = {"", 0, 0};
+        Excitacoes *ex_in  = (Excitacoes *)malloc(PHASES * sizeof(Excitacoes));
+        Excitacoes *ex_out = (Excitacoes *)malloc(PHASES * sizeof(Excitacoes));
+        Excitacoes *ex     = (Excitacoes *)malloc(PHASES * sizeof(Excitacoes));
 
         Message("\nBuscando excitações de entrada...");
-        getExcitacoes(ex_in, 0);
-
+        getExcitacoes(ex_in, 0);        
         Message("\nBuscando excitações de saída...");
         getExcitacoes(ex_out, 1);
 
@@ -171,7 +193,7 @@ void setCorrente()
             for(i = 0; i < n_linhas_in_current; i++)
             {			
                 token = strtok(conteudo_in_current[i], DELIMITER); // Faz um split da linha
-                
+
                 strcpy(ex[i].nome, token);          // Salva o nome 
                 strcpy(buffer, ex[i].nome);         // Salva o nome para edição
 
@@ -193,10 +215,10 @@ void setCorrente()
         
             for(i=0; i<PHASES; i++)
             {
-                strcpy(buffer, ex_in[i].nome);
-                strcpy(buffer, toLower(buffer));
+                strcpy(buffer, ex_in[i].nome);      // Copia o nome para um buffer
+                strcpy(buffer, toLower(buffer));    // Converte para minúsculas
                 
-                token = strtok(buffer, "_");
+                token = strtok(buffer, "_");        // Split "_"
                 j = 0;
                 while (token != NULL)
                 {
@@ -241,7 +263,7 @@ void setCorrente()
             {	
                 fprintf(arquivo_current, "%s%s%d%s%f\n", ex[i].nome, DELIMITER, ex[i].face_id, DELIMITER, ex[i].valor);
                 
-                sprintf(sLog, "%s\t%f", sLog, ex[i].valor);
+                sprintf(sLog, "%s\t%.4f", sLog, ex[i].valor);
                 
                 Message("\n\t%s\t%d\t%f", ex[i].nome, ex[i].face_id, ex[i].valor);
             }
@@ -249,6 +271,7 @@ void setCorrente()
             sprintf(sLog, "%s\n", sLog);
             fprintf(log_file, sLog);
             
+            fclose(log_file);
             fclose(arquivo_current);
             
             Message("\n\nTime: %f\n", CURRENT_TIME);
@@ -294,4 +317,11 @@ DEFINE_ON_DEMAND(Atualiza_corrente_Demand)
 DEFINE_EXECUTE_AT_END(Atualiza_corrente_Fim)
 {
     setCorrente();
+}
+
+DEFINE_INIT(start_log_current, d)
+{
+    FILE *log_file = fopen(LOG_FILE_NAME, "w");
+    fprintf(log_file, "Início do log de correntes\n\n");
+    fclose(log_file);
 }
