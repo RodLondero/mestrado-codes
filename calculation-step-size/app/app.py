@@ -24,6 +24,7 @@ class Ui(QMainWindow):
         self.setMinimumSize(300, 160)
         # Edits
         self.spinBoxPontos = self.findChild(QSpinBox, 'spinBoxPontos')  # type: QSpinBox
+        self.spinBoxPontos.setMaximum(10000)
         self.spinBoxCiclos = self.findChild(QSpinBox, 'spinBoxCiclos')  # type: QSpinBox
         self.editPassos    = self.findChild(QLineEdit, 'editPassos')    # type: QLineEdit
         self.editPasso     = self.findChild(QLineEdit, 'editPasso')     # type: QLineEdit
