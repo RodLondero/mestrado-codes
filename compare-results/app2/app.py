@@ -1,7 +1,9 @@
 from PyQt5 import uic
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from datetime import date, datetime
+from pprint import pprint
 import numpy as np
 
 import pandas as pd
@@ -9,12 +11,12 @@ import sys, os, csv
 import plotly.express as px
 import plotly.graph_objs as go
 import pathlib
-
+import random
 
 pathdir = pathlib.Path(__file__).parent.absolute()
 
 symbols = ['circle', 'square', 'triangle-up', 'cross', 'star']
-dash = ["solid", "dot", "dash", "dashdot", "longdash", "longdashdot"]
+dash = ["dot", "dash", "dashdot", "longdash", "longdashdot"]
 
 class Ui(QMainWindow):
     def __init__(self, root_path: str = None):
@@ -22,12 +24,13 @@ class Ui(QMainWindow):
         super(Ui, self).__init__()
         uic.loadUi(f'{pathdir}/window.ui', self)  # Load the .ui file
         
-        self.setFixedSize(550, 380)
+        self.setFixedSize(800, 400)
         
         self.__findElements()
         
         self.dfs = list()
         self.columns = list()
+        
         self.editPasta.setText(root_path)
         self.loadFiles(root_path)
         
@@ -36,18 +39,20 @@ class Ui(QMainWindow):
     def __findElements(self):
         # Edits
         self.editPasta  = self.findChild(QLineEdit, 'editPasta')  # type: QLineEdit
+        self.editFiltro = self.findChild(QLineEdit, 'editFiltro')  # type: QLineEdit
+        self.editFiltro.textChanged.connect(self.on_textChanged)
 
         # Lists
         self.listArquivos = self.findChild(QListWidget, 'listArquivos')     # type: QListWidget
         self.listArquivos.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.listArquivos.itemSelectionChanged.connect(self.clickAbrir)
+        self.listArquivos.itemSelectionChanged.connect(self.reset_column_list)
         
         self.listColunas = self.findChild(QListWidget, 'listColunas')       # type: QListWidget
         self.listColunas.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
         # Buttons
         self.btnPasta  = self.findChild(QToolButton, 'btnPasta')    # type: QToolButton
-        self.btnPasta.clicked.connect(self.openFolderDialog)
+        self.btnPasta.clicked.connect(self._openFolderDialog)
         
         self.btnAbrir  = self.findChild(QPushButton, 'btnAbrir')    # type: QPushButton
         self.btnAbrir.clicked.connect(self.clickAbrir)
@@ -61,33 +66,65 @@ class Ui(QMainWindow):
         self.comboSep.currentTextChanged.connect(self.clickAbrir)
         self.comboDecimal = self.findChild(QComboBox, 'comboDecimal')   # type: QComboBox
         self.comboDecimal.currentTextChanged.connect(self.clickAbrir)
+        self.comboOpcoes  = self.findChild(QComboBox, 'comboOpcoes')    # type: QComboBox
         
         # CheckBox
         self.checkBoxHTML = self.findChild(QCheckBox, 'checkBoxHTML') # type: QCheckBox
         self.checkBoxCSV  = self.findChild(QCheckBox, 'checkBoxCSV')  # type: QCheckBox       
         self.checkBoxPDF  = self.findChild(QCheckBox, 'checkBoxPDF')  # type: QCheckBox
         self.checkBoxSVG  = self.findChild(QCheckBox, 'checkBoxSVG')  # type: QCheckBox
-        
-        
-    def openFolderDialog(self):
+            
+    def _openFolderDialog(self):
         fname = QFileDialog.getExistingDirectory(self, "Selecione o diretório.")
         if fname != "":
             self.editPasta.setText(fname + "/")
             self.loadFiles(fname)
             
+    @QtCore.pyqtSlot(str)
+    def on_textChanged(self, text):
+        for row in range(self.listArquivos.count()):
+            it = self.listArquivos.item(row)
+            # widget = self.listArquivos.itemWidget(it)
+            if text: 
+                it.setHidden(not self.filter(text, it.text()))
+            else:
+                it.setHidden(False)
+
+    def filter(self, text, keywords):
+        # foo filter
+        # in the example the text must be in keywords
+        return text in keywords
+
     def loadFiles(self, fname):
         self.listArquivos.clear()
         for f in os.listdir(fname):
             if f.endswith(".out") or f.endswith('.csv'):
                 self.listArquivos.addItem(f)
-                    
+
+        for f in os.scandir(fname):
+            if f.is_dir():
+                for arquivo in os.listdir(f.path):
+                    if arquivo.endswith(".out") or arquivo.endswith('.csv'):
+                        self.listArquivos.addItem(f.name + "\\" + arquivo)
+                     
     def clickAtualizar(self):
         try:
             if self.editPasta.text() == "":
                 raise Exception("Selecione uma pasta.")
             
+            selectedItems = list()
+            for item in self.listArquivos.selectedItems():
+                selectedItems.append(item.text())
+
             self.loadFiles(self.editPasta.text())
-            
+
+            # self.listArquivos.setSelectionMode(QListWidget.MultiSelection)
+            for i in selectedItems:
+                matching_items = self.listArquivos.findItems(i, Qt.MatchExactly)
+                # self.listArquivos.setCurrentItem(i)
+                for item in matching_items:
+                    item.setSelected(True)
+
         except Exception as e:
             mensagemErro(e)
     
@@ -99,6 +136,9 @@ class Ui(QMainWindow):
             self.plotar()
         except Exception as e:
             mensagemErro(e)
+
+    def reset_column_list(self):
+        self.listColunas.clear()
             
     def clickAbrir(self):
         try:
@@ -108,20 +148,29 @@ class Ui(QMainWindow):
             self.dfs.clear()
             self.listColunas.clear()
             self.columns.clear()
-                        
-            for arquivo in self.listArquivos.selectedItems():
-                path = os.path.join(self.editPasta.text(), arquivo.text())
-                self.getFileColumns(path)
+
+            selectedItems = list()
+            for item in self.listArquivos.selectedItems():
+                selectedItems.append(item.text())
+            selectedItems.sort(reverse=False)
+            
+            for arquivo in selectedItems:
+                path = os.path.join(self.editPasta.text(), arquivo)
+                self.getFileColumns(path, arquivo)
                 
             self.listColunas.addItems(self.columns)
                         
         except Exception as e:
             mensagemErro(e)
     
-    def getFileColumns(self, path: str):
+    def getFileColumns(self, path: str, name: str = None):
 
-        file_path, file_extension = os.path.splitext(path)
-        name = file_path.replace("/", "\\").split("\\")[-1]
+        _, file_extension = os.path.splitext(path)
+        
+        if name.find("\\") != -1 or name.find("/") != -1:
+            name, _ = os.path.splitext(name) 
+            name = name.replace("/", "\\")
+            name = name.split("\\")[0]
 
         if file_extension == ".csv":
             separador = " " if str(self.comboSep.currentText()) == "Espaço" else str(self.comboSep.currentText()) 
@@ -172,26 +221,36 @@ class Ui(QMainWindow):
 
         return dataframe
     
+    def getMode(self):        
+        if self.comboOpcoes.currentIndex() == 0:
+            return "lines+markers"
+        elif self.comboOpcoes.currentIndex() == 1:
+            return "lines"
+        else: 
+            return "markers"
+
     def plotar(self):
         try:
             fig = go.Figure()
+
+            self.total = dict()
 
             df_count = 0
             for df in self.dfs:                    
                 for coluna in self.listColunas.selectedItems():
                     if coluna.text() in df.columns:
+                        self.total[f"{df.Name}_{coluna.text()}"] =df[coluna.text()].count()
                         fig.add_trace(
                             go.Scatter(x=df['flow-time'],
                                         y=df[coluna.text()],
                                         name=f"{df.Name}: {coluna.text()}",
-                                        mode='lines+markers',
-                                        marker_symbol=symbols[df_count],
-                                        line=dict(dash=dash[df_count])
+                                        mode=self.getMode(),
+                                        marker_symbol=random.choice(symbols),
+                                        line=dict(dash="solid" if df_count == 0 else random.choice(dash))
                                         )
                         ) 
                 df_count += 1      
         
-
             fig.update_layout(title="Comparação de resultados",
                               xaxis_title='Tempos (s)',
                               yaxis_title='Amplitude',
@@ -199,8 +258,8 @@ class Ui(QMainWindow):
                                           orientation="h",
                                           yanchor="bottom",
                                           y=1.02,
-                                         xanchor="right",
-                                         x=1),
+                                          xanchor="right",
+                                          x=1),
                               template='plotly_white'
                              )
         
@@ -210,9 +269,10 @@ class Ui(QMainWindow):
                 self.checkBoxSVG.isChecked()):
                 self.salvar(fig)
 
+           
+            for key, value in self.total.items():
+                print(f"{key}: {value}")
             fig.show()
-
-            # mensagemSucesso()
 
         except Exception as e:
             mensagemErro(e)
@@ -267,6 +327,7 @@ class Ui(QMainWindow):
         self.filename1 = None
         self.filename2 = None
         
+           
 def mensagemErro(e: Exception):
     print("{0}".format(e))
     msg = QMessageBox()
@@ -276,7 +337,6 @@ def mensagemErro(e: Exception):
     msg.setInformativeText("{0}".format(e))
     msg.setWindowTitle("Erro")
     msg.exec_()
-
 
 def mensagemSucesso():
     msg = QMessageBox()
