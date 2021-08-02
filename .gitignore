@@ -12,3 +12,5 @@ venv
 
 # notebook
 .ipynb_checkpoints
+get-time-simulation/run_get_time_simulation.bat
+compare-results/run_compare_results.bat
