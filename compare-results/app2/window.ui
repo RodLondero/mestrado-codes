@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>1030</width>
     <height>392</height>
    </rect>
   </property>
@@ -66,9 +66,9 @@
    <widget class="QPushButton" name="btnAbrir">
     <property name="geometry">
      <rect>
-      <x>280</x>
+      <x>340</x>
       <y>290</y>
-      <width>111</width>
+      <width>171</width>
       <height>31</height>
      </rect>
     </property>
@@ -85,7 +85,7 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>520</x>
       <y>60</y>
       <width>47</width>
       <height>13</height>
@@ -98,7 +98,7 @@
    <widget class="QPushButton" name="btnPlotar">
     <property name="geometry">
      <rect>
-      <x>640</x>
+      <x>870</x>
       <y>350</y>
       <width>141</width>
       <height>31</height>
@@ -113,7 +113,7 @@
      <rect>
       <x>10</x>
       <y>290</y>
-      <width>201</width>
+      <width>161</width>
       <height>91</height>
      </rect>
     </property>
@@ -197,7 +197,7 @@
      <rect>
       <x>10</x>
       <y>80</y>
-      <width>381</width>
+      <width>500</width>
       <height>201</height>
      </rect>
     </property>
@@ -205,9 +205,9 @@
    <widget class="QListWidget" name="listColunas">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>520</x>
       <y>80</y>
-      <width>381</width>
+      <width>500</width>
       <height>201</height>
      </rect>
     </property>
@@ -228,9 +228,9 @@
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>520</x>
       <y>290</y>
-      <width>231</width>
+      <width>341</width>
       <height>91</height>
      </rect>
     </property>
@@ -293,7 +293,7 @@
    <widget class="QComboBox" name="comboOpcoes">
     <property name="geometry">
      <rect>
-      <x>640</x>
+      <x>870</x>
       <y>320</y>
       <width>141</width>
       <height>22</height>
@@ -318,7 +318,7 @@
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
-      <x>640</x>
+      <x>870</x>
       <y>300</y>
       <width>47</width>
       <height>13</height>
@@ -333,7 +333,17 @@
      <rect>
       <x>70</x>
       <y>58</y>
-      <width>321</width>
+      <width>441</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="editFiltroColunas">
+    <property name="geometry">
+     <rect>
+      <x>579</x>
+      <y>58</y>
+      <width>441</width>
       <height>20</height>
      </rect>
     </property>
