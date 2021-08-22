@@ -1,3 +1,5 @@
+import re
+import time
 from PyQt5 import uic
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
@@ -24,7 +26,7 @@ class Ui(QMainWindow):
         super(Ui, self).__init__()
         uic.loadUi(f'{pathdir}/window.ui', self)  # Load the .ui file
         
-        self.setFixedSize(800, 400)
+        self.setFixedSize(1030, 400)
         
         self.__findElements()
         
@@ -41,6 +43,8 @@ class Ui(QMainWindow):
         self.editPasta  = self.findChild(QLineEdit, 'editPasta')  # type: QLineEdit
         self.editFiltro = self.findChild(QLineEdit, 'editFiltro')  # type: QLineEdit
         self.editFiltro.textChanged.connect(self.on_textChanged)
+        self.editFiltroColunas = self.findChild(QLineEdit, 'editFiltroColunas')  # type: QLineEdit
+        self.editFiltroColunas.textChanged.connect(self.on_textChangedColunas)
 
         # Lists
         self.listArquivos = self.findChild(QListWidget, 'listArquivos')     # type: QListWidget
@@ -81,12 +85,22 @@ class Ui(QMainWindow):
             self.loadFiles(fname)
             
     @QtCore.pyqtSlot(str)
-    def on_textChanged(self, text):
+    def on_textChanged(self, text: str):
         for row in range(self.listArquivos.count()):
             it = self.listArquivos.item(row)
             # widget = self.listArquivos.itemWidget(it)
             if text: 
-                it.setHidden(not self.filter(text, it.text()))
+                it.setHidden(not self.filter(text.lower(), it.text().lower()))
+            else:
+                it.setHidden(False)
+            
+    @QtCore.pyqtSlot(str)
+    def on_textChangedColunas(self, text: str):
+        for row in range(self.listColunas.count()):
+            it = self.listColunas.item(row)
+            # widget = self.listArquivos.itemWidget(it)
+            if text: 
+                it.setHidden(not self.filter(text.lower(), it.text().lower()))
             else:
                 it.setHidden(False)
 
@@ -98,14 +112,16 @@ class Ui(QMainWindow):
     def loadFiles(self, fname):
         self.listArquivos.clear()
         for f in os.listdir(fname):
-            if f.endswith(".out") or f.endswith('.csv'):
+            if f.endswith(".out") or f.endswith('.csv') or f.endswith('.trn'):
                 self.listArquivos.addItem(f)
 
         for f in os.scandir(fname):
             if f.is_dir():
                 for arquivo in os.listdir(f.path):
-                    if arquivo.endswith(".out") or arquivo.endswith('.csv'):
+                    if arquivo.endswith(".out") or arquivo.endswith('.csv') or arquivo.endswith('.trn'):
                         self.listArquivos.addItem(f.name + "\\" + arquivo)
+
+        self.listArquivos.sortItems()
                      
     def clickAtualizar(self):
         try:
@@ -182,15 +198,58 @@ class Ui(QMainWindow):
             df = self.readOutFile(path)
             df.Name = name
 
+        elif file_extension == ".trn":
+            pattern_data = re.compile(
+        "^(\s+(([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\s+)+)(([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?(:([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?)+)\s+[0-9]+$")
+            pattern_title = re.compile(
+                "^(\s+([a-zA-Z]+\s+)+)[a-zA-Z]-[a-zA-Z]+\s+[a-zA-Z]-[a-zA-Z]+\s+[a-zA-Z]-[a-zA-Z]+\s+[a-zA-Z]+\s+k\s+[a-zA-Z]+\s+[a-zA-Z]+([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\s+p1\s+[a-zA-Z]+/[a-zA-Z]+$")
+
+            columns = []
+            lines = []
+
+            start_time = time.time()
+            
+            for i, line in enumerate(open(path)):
+                if not columns:
+                    for match in re.finditer(pattern_title, line):
+                        print("Getting titles...")
+                        columns = self.get_titles(match.group())
+
+                for match in re.finditer(pattern_data, line):
+                    result = match.group().strip().split()
+                    
+                    if (int(result[0]) % 1000 == 0) and int(result[-1]) != 0:
+                        print("Getting iteration: " + result[0])
+                        
+                    lines.append(result)
+
+            # Create a DataFrame and convert data to float
+            df = pd.DataFrame(data=lines, columns=columns)
+            # df.set_index("iter")
+            df.Name = name
+
+            del (df['time'])
+
         # listWidget.clear()
 
         for c in df.columns:
-            if c.lower().strip().replace(" ", "-") not in ['time-step', 'flow-time']:
+            if c.lower().strip().replace(" ", "-") not in ['time-step', 'flow-time', 'iter']:
                 if c not in self.columns:
                     self.columns.append(c)
                     
         self.dfs.append(df)
 
+    def get_titles(self, line: str):
+        titles_list = line.replace("/", " ").strip().split(" ")
+        titles_list[-1] = 'iteration'
+
+        titles = []
+        for title in titles_list:
+            if title != "":
+                titles.append(title)
+
+        return titles.copy()
+        
     def readOutFile(self, filename: str):
 
         with open(filename, 'r') as f:
@@ -236,12 +295,12 @@ class Ui(QMainWindow):
             self.total = dict()
 
             df_count = 0
-            for df in self.dfs:                    
+            for df in self.dfs:       
                 for coluna in self.listColunas.selectedItems():
                     if coluna.text() in df.columns:
                         self.total[f"{df.Name}_{coluna.text()}"] =df[coluna.text()].count()
                         fig.add_trace(
-                            go.Scatter(x=df['flow-time'],
+                            go.Scatter(x=df['flow-time'] if 'flow-time' in df.columns else df['iter'],
                                         y=df[coluna.text()],
                                         name=f"{df.Name}: {coluna.text()}",
                                         mode=self.getMode(),
@@ -252,8 +311,14 @@ class Ui(QMainWindow):
                 df_count += 1      
         
             fig.update_layout(title="Comparação de resultados",
-                              xaxis_title='Tempos (s)',
-                              yaxis_title='Amplitude',
+                              xaxis_title='Tempos (s)' if 'flow-time' in df.columns else 'Iterações',
+                            #   yaxis_title='Amplitude',
+                              yaxis_type='linear' if 'flow-time' in df.columns else 'log',
+                              yaxis=dict(
+                                        showexponent='all',
+                                        exponentformat='power',
+                                        title='Amplitude',
+                              ),
                               legend=dict(
                                           orientation="h",
                                           yanchor="bottom",
