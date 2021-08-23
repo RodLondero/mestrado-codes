@@ -41,7 +41,7 @@ def calc_by_ASTM(df: pd.DataFrame, column: str = 1):
 
         # Energia Incidente no intervalo considerado (cal/cm²)
         # Q  = g * cal/gºC * ºC / cm^2
-        Q[i] = (massa * cp_medio[i] * (tc[i] - tc[0]) / area * 0.239)
+        Q[i] = (massa * cp_medio[i] * (tc[i] - tc[0]) / area)
 
     df['EI'] = Q
 
