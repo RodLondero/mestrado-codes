@@ -12,5 +12,17 @@ venv
 
 # notebook
 .ipynb_checkpoints
+
+# Bat files
 get-time-simulation/run_get_time_simulation.bat
 compare-results/run_compare_results.bat
+calcula-ei/@run_calcula_ei.bat
+plot-residuals/src/@run_plot_residuals.bat
+
+# Fluent files
+*.out
+*.trn
+*.csv
+
+# Other files
+desktop.ini

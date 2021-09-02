@@ -66,7 +66,7 @@ def get_titles(line: str):
     return titles.copy()
 
 
-def plot(df_plot: pd.DataFrame, save_file: bool = True, filename: str = "", path_to_save: str = None):
+def plot(df_plot: pd.DataFrame, save_file: bool = False, filename: str = "", path_to_save: str = None):
     remove_to_plot = ['iter', 'time', 'iteration']
     columns_to_plot = []
 

@@ -1,12 +1,13 @@
 import sys
 from PyQt5 import QtWidgets
 
-from window.PlotWindow import PlotWindow
+from gui.window import Ui
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    
-    mainWin = PlotWindow()    
+
+    mainWin = Ui()    
     mainWin.show()
     
     sys.exit( app.exec_() )

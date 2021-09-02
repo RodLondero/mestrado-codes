@@ -6,18 +6,18 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QSize, QRect
 from numpy import empty
 
-from functions.plot import main
+from core.core import main
+from gui.message_box import MessageBoxError
 
-class PlotWindow(QMainWindow):
+class Ui(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
-        # self.setStyle(QStyleFactory.create("Oxygen"))
-        self.setMinimumSize(QSize(440, 160))
-        self.setWindowTitle("Plot Ansys Fluent Reports")
-       
-        self.results_directory = os.path.dirname(os.path.abspath(__file__))
-        self.results_directory = ".\\"
         
+        self.setMinimumSize(QSize(440, 160))
+        self.setWindowTitle("Plot Ansys Fluent Residuals")
+        
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.results_directory = self.base_dir  # + "\\..\\resultados\\"
         self.files = []
         self.file_extension = ".trn"
 
@@ -94,16 +94,11 @@ class PlotWindow(QMainWindow):
                  salvar_csv=self.checkBoxSalvarCSV.isChecked,
                  path_to_save=self.textPathtoSave.toPlainText())
         except Exception as e:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.setText("Erro")
-            msg.setInformativeText("{0}".format(e))
-            msg.setWindowTitle("Erro")
-            msg.exec_()
+            MessageBoxError("{0}".format(e))
+
 
     def getFolder(self):
-        fname = QFileDialog.getExistingDirectory(
-            self, "Selecione o diretório.")
+        fname = QFileDialog.getExistingDirectory(self, "Selecione o diretório.")
 
         if fname != "":
             self.results_directory = fname + "/"
@@ -131,8 +126,7 @@ class PlotWindow(QMainWindow):
             self.resize(QSize(440, 160))
             
     def getFoldertoSave(self):
-        fname = QFileDialog.getExistingDirectory(
-            self, "Selecione o diretório.")
+        fname = QFileDialog.getExistingDirectory(self, "Selecione o diretório.")
 
         if fname != "":
             self.textPathtoSave.setText(fname)
