@@ -4,7 +4,8 @@ import pandas as pd
 
 class Mesclar:
     def __init__(self):
-        self.path = os.path.dirname(pathlib.Path(__file__).absolute())
+        self.path = os.getcwd()
+        print(self.path)
         self.destinationFolder = "teste"
         self.destinationPath = os.path.join(self.path, self.destinationFolder)
         self.file_list = []
@@ -29,17 +30,29 @@ class Mesclar:
             for name in self.base_files_name:
                 optionNumber += 1
                 print(f" {'*' if name in names else '' :<2} {optionNumber} - {name}")
-            print("0 - Fim")
+            print("-----------------------------------")
+            print(f"{'':<3} 0 - Todos")
+            print("-----------------------------------")
+            print(f"{'':<2} -1 - Fim")
             
             optionSelected = input("> ")
             
-            if not optionSelected or int(optionSelected) == 0:
+            if not optionSelected or int(optionSelected) == -1:
                 break
             
             optionSelected = int(optionSelected)
 
+            if optionSelected == 0:
+                names = self.base_files_name
+                break
+
             if optionSelected in range(1, len(self.base_files_name) + 1):
-                names.append(self.base_files_name[optionSelected - 1])
+                nameSelected = self.base_files_name[optionSelected - 1]
+                
+                if not nameSelected in names:
+                    names.append(nameSelected)
+                else:
+                    names.remove(nameSelected)
         
         return names
                 
