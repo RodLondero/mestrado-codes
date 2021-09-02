@@ -56,6 +56,9 @@ class Ui(QMainWindow):
         self.btnFile.clicked.connect(self.openFileNameDialog)
         self.btnCalcular.clicked.connect(self.calcular_ei)
         self.btnAbrir.clicked.connect(self.abrirArquivos)
+        self.comboBoxSep.currentTextChanged.connect(self.abrirArquivos)
+        self.comboBoxDecimal.currentTextChanged.connect(self.abrirArquivos)
+        self.lineEdit.textChanged.connect(self.abrirArquivos)
 
     def openFileNameDialog(self):
         """ Open FileDialog and get the full path of a file """
@@ -64,50 +67,7 @@ class Ui(QMainWindow):
         fileName, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","All Files (*);;CSV Files (*.csv)", options=options)
         if fileName:
             self.lineEdit.setText(fileName)
-    
-    def calcular_ei(self):
-        """ Calculate the Incident Energy """
-        try:
-            # Check if the file is selected
-            if self.lineEdit.text() == "":
-                raise Exception("Selecione um arquivo.")
-
-            # Check if an item is selected
-            if not self.list1.selectedItems():
-                raise Exception("Selecione uma coluna")
-
-            path      = self.lineEdit.text()
-            separador = " " if str(self.comboBoxSep.currentText()) == "Espaço" else str(self.comboBoxSep.currentText()) 
-            decimal   = str(self.comboBoxDecimal.currentText())
-            
-            # Calc EI using ASTM 
-            calc_by_ASTM(self.df, self.list1.selectedItems()[0].text())
-            
-            # Get the max EI
-            max_EI = f"{self.df['EI'].max():.4f} [cal/cm^2]"
-
-            # Print the max EI
-            print(f"\nMáxima EI: {max_EI}")
-
-            # Make a plot
-            self.plot()
-
-            # Show a message with the max EI
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Information)
-            msg.setText("Máxima EI")
-            msg.setInformativeText(max_EI)
-            msg.setWindowTitle("Informação")
-            msg.exec_()
-        except Exception as e:
-            print("{0}".format(e))
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.setText("Erro")
-            msg.setInformativeText("{0}".format(e))
-            msg.setWindowTitle("Erro")
-            msg.exec_()
-    
+        
     def abrirArquivos(self):
         """ Open the selected file and get it columns """
         try:
@@ -176,6 +136,49 @@ class Ui(QMainWindow):
         dataframe.name = title
 
         return dataframe
+
+    def calcular_ei(self):
+        """ Calculate the Incident Energy """
+        try:
+            # Check if the file is selected
+            if self.lineEdit.text() == "":
+                raise Exception("Selecione um arquivo.")
+
+            # Check if an item is selected
+            if not self.list1.selectedItems():
+                raise Exception("Selecione uma coluna")
+
+            path      = self.lineEdit.text()
+            separador = " " if str(self.comboBoxSep.currentText()) == "Espaço" else str(self.comboBoxSep.currentText()) 
+            decimal   = str(self.comboBoxDecimal.currentText())
+            
+            # Calc EI using ASTM 
+            calc_by_ASTM(self.df, self.list1.selectedItems()[0].text())
+            
+            # Get the max EI
+            max_EI = f"{self.df['EI'].max():.4f} [cal/cm^2]"
+
+            # Print the max EI
+            print(f"\nMáxima EI: {max_EI}")
+
+            # Make a plot
+            self.plot()
+
+            # Show a message with the max EI
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("Máxima EI")
+            msg.setInformativeText(max_EI)
+            msg.setWindowTitle("Informação")
+            msg.exec_()
+        except Exception as e:
+            print("{0}".format(e))
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Erro")
+            msg.setInformativeText("{0}".format(e))
+            msg.setWindowTitle("Erro")
+            msg.exec_()
 
     def plot(self, **kwargs):
         """ Make the plot using Plotly """
@@ -249,9 +252,10 @@ class Ui(QMainWindow):
             
             # Save the data in CSV file
             if self.checkBoxCSV.isChecked():
+                coluna = self.list1.currentItem().text()
                 self.df.to_csv(f"{directory}/{name}.csv", 
                                 sep=";", 
-                                columns=['flow-time', 'termopar-temperatura', 'EI'],
+                                columns=['flow-time', coluna, 'EI'],
                                 index=False, 
                                 na_rep="NA")
 
