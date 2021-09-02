@@ -5,8 +5,7 @@ import pandas as pd
 class Mesclar:
     def __init__(self):
         self.path = os.getcwd()
-        print(self.path)
-        self.destinationFolder = "teste"
+        self.destinationFolder = "merged"
         self.destinationPath = os.path.join(self.path, self.destinationFolder)
         self.file_list = []
         self.base_files_name = []
