@@ -1,21 +1,18 @@
 import os
-import sys
-from PyQt5 import QtCore, QtWidgets
-import PyQt5
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import QSize, QRect
-from numpy import empty
 
+from PyQt5.QtCore import QSize, QRect
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QLabel, QTextEdit, QComboBox, QCheckBox, QWidget, QFileDialog
 from core.core import main
 from gui.message_box import MessageBoxError
+
 
 class Ui(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
-        
+
         self.setMinimumSize(QSize(440, 160))
         self.setWindowTitle("Plot Ansys Fluent Residuals")
-        
+
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
         self.results_directory = self.base_dir  # + "\\..\\resultados\\"
         self.files = []
@@ -61,28 +58,29 @@ class Ui(QMainWindow):
         self.checkBoxSalvarHTML.setGeometry(QRect(40, 120, 100, 30))
         self.checkBoxSalvarHTML.setText("Salvar HTML")
         self.checkBoxSalvarHTML.stateChanged.connect(self.checkBoxChangeAction)
-        
+
         self.checkBoxSalvarCSV = QCheckBox(self.centralWidget)
         self.checkBoxSalvarCSV.setGeometry(QRect(150, 120, 90, 30))
         self.checkBoxSalvarCSV.setText("Salvar CSV")
         self.checkBoxSalvarCSV.stateChanged.connect(self.checkBoxChangeAction)
-        
+
         self.labelSaveFile = QLabel(self.centralWidget)
         self.labelSaveFile.setGeometry(QRect(40, 150, 220, 30))
         self.labelSaveFile.setText("Selecione o diretório para salvar os arquivos: ")
         self.labelSaveFile.hide()
-        
+
         self.textPathtoSave = QTextEdit(self.centralWidget)
         self.textPathtoSave.setGeometry(QRect(40, 180, 340, 30))
         self.textPathtoSave.setObjectName("editPathtoSave")
-        
+
         self.btnOpenFiletoSave = QPushButton(self.centralWidget)
         self.btnOpenFiletoSave.setGeometry(QRect(380, 180, 40, 30))
         self.btnOpenFiletoSave.setObjectName("btnOpenFiletoSave")
         self.btnOpenFiletoSave.setText("..")
         self.btnOpenFiletoSave.clicked.connect(self.getFoldertoSave)
-        self.btnOpenFiletoSave.hide()       
-        
+        self.btnOpenFiletoSave.hide()
+
+        self.getFolder()
 
     def click(self):
         try:
@@ -90,12 +88,11 @@ class Ui(QMainWindow):
                 raise Exception("Selecione um arquivo para plotar")
 
             main(self.results_directory, self.comboBox.currentText(),
-                 salvar_html=self.checkBoxSalvarHTML.isChecked,
-                 salvar_csv=self.checkBoxSalvarCSV.isChecked,
+                 salvar_html=self.checkBoxSalvarHTML.isChecked(),
+                 salvar_csv=self.checkBoxSalvarCSV.isChecked(),
                  path_to_save=self.textPathtoSave.toPlainText())
         except Exception as e:
             MessageBoxError("{0}".format(e))
-
 
     def getFolder(self):
         fname = QFileDialog.getExistingDirectory(self, "Selecione o diretório.")
@@ -112,7 +109,7 @@ class Ui(QMainWindow):
             for f in self.files:
                 self.comboBox.addItem(f)
 
-    def checkBoxChangeAction(self):        
+    def checkBoxChangeAction(self):
         if self.checkBoxSalvarHTML.isChecked() or self.checkBoxSalvarCSV.isChecked():
             self.labelSaveFile.show()
             self.btnOpenFiletoSave.show()
@@ -124,7 +121,7 @@ class Ui(QMainWindow):
             self.textPathtoSave.clear()
             self.setMinimumSize(QSize(440, 160))
             self.resize(QSize(440, 160))
-            
+
     def getFoldertoSave(self):
         fname = QFileDialog.getExistingDirectory(self, "Selecione o diretório.")
 
