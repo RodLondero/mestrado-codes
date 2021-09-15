@@ -1,6 +1,6 @@
 import os
-import pathlib
 import pandas as pd
+
 
 class Mesclar:
     def __init__(self):
@@ -11,7 +11,7 @@ class Mesclar:
         self.base_files_name = []
 
         self.__getFiles()
-        
+
         self.selectedFiles = self.__choseFiles()
 
         self.dfs = self.__readFluentReportFiles()
@@ -25,20 +25,21 @@ class Mesclar:
         optionSelected = -1
         while optionSelected != 0:
             optionNumber = 0
-            
+
             for name in self.base_files_name:
                 optionNumber += 1
                 print(f" {'*' if name in names else '' :<2} {optionNumber} - {name}")
+            
             print("-----------------------------------")
             print(f"{'':<3} 0 - Todos")
             print("-----------------------------------")
             print(f"{'':<2} -1 - Fim")
-            
+
             optionSelected = input("> ")
-            
+
             if not optionSelected or int(optionSelected) == -1:
                 break
-            
+
             optionSelected = int(optionSelected)
 
             if optionSelected == 0:
@@ -47,14 +48,14 @@ class Mesclar:
 
             if optionSelected in range(1, len(self.base_files_name) + 1):
                 nameSelected = self.base_files_name[optionSelected - 1]
-                
+
                 if not nameSelected in names:
                     names.append(nameSelected)
                 else:
                     names.remove(nameSelected)
-        
+
         return names
-                
+
     def __getFiles(self):
         for f in os.listdir(self.path):
             if f.endswith(".out"):
@@ -67,9 +68,9 @@ class Mesclar:
                     if arquivo.endswith(".out"):
                         self.file_list.append(os.path.join(self.path, f.name + "\\" + arquivo))
 
-    def __readFluentReportFiles(self):        
+    def __readFluentReportFiles(self):
         df_list = []
-        
+
         for file in self.file_list:
             title = file.split(".")[0].split("\\")[-1]
 
@@ -106,13 +107,13 @@ class Mesclar:
 
     def mergeFiles(self):
         data = pd.DataFrame()
-        
+
         print("")
-        for file_name in self.selectedFiles: 
+        for file_name in self.selectedFiles:
             print(f"Merging {file_name} ...")
             count = 0
-            for df in self.dfs: 
-                if df.name == file_name: 
+            for df in self.dfs:
+                if df.name == file_name:
                     if count == 0:
                         data = df.copy()
                     else:
