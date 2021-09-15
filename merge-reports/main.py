@@ -128,7 +128,7 @@ class Mesclar:
             if not os.path.exists(self.destinationPath):
                 os.makedirs(self.destinationPath)
 
-            data.to_csv(os.path.join(self.destinationPath, file_name + '.csv'), sep=';', decimal=",", index=False)
+            data.to_csv(os.path.join(self.destinationPath, file_name + '.csv'), sep=';', decimal=".", index=False)
                     
 
 
