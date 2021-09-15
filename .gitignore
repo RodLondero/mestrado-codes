@@ -18,6 +18,7 @@ get-time-simulation/run_get_time_simulation.bat
 compare-results/run_compare_results.bat
 calcula-ei/@run_calcula_ei.bat
 plot-residuals/src/@run_plot_residuals.bat
+merge-reports/@run_merge_reports.bat
 
 # Fluent files
 *.out
