@@ -1,12 +1,13 @@
-import os
+from os import getcwd, path, listdir, scandir, makedirs, system, startfile
+import sys
 import pandas as pd
 
 
 class Mesclar:
     def __init__(self):
-        self.path = os.getcwd()
+        self.path = getcwd()
         self.destinationFolder = "merged"
-        self.destinationPath = os.path.join(self.path, self.destinationFolder)
+        self.destinationPath = path.join(self.path, self.destinationFolder)
         self.file_list = []
         self.base_files_name = []
 
@@ -16,6 +17,7 @@ class Mesclar:
 
         self.dfs = self.__readFluentReportFiles()
 
+        startfile(self.destinationPath)
     def __choseFiles(self):
         print("============================================")
         print(" Quais arquivos deseja mesclar: ")
@@ -38,7 +40,7 @@ class Mesclar:
             optionSelected = input("> ")
 
             if not optionSelected or int(optionSelected) == -1:
-                break
+                exit()
 
             optionSelected = int(optionSelected)
 
@@ -57,16 +59,16 @@ class Mesclar:
         return names
 
     def __getFiles(self):
-        for f in os.listdir(self.path):
+        for f in listdir(self.path):
             if f.endswith(".out"):
-                self.file_list.append(os.path.join(self.path, f))
+                self.file_list.append(path.join(self.path, f))
                 self.base_files_name.append(f.split('.')[0])
 
-        for f in os.scandir(self.path):
+        for f in scandir(self.path):
             if f.is_dir():
-                for arquivo in os.listdir(f.path):
+                for arquivo in listdir(f.path):
                     if arquivo.endswith(".out"):
-                        self.file_list.append(os.path.join(self.path, f.name + "\\" + arquivo))
+                        self.file_list.append(path.join(self.path, f.name + "\\" + arquivo))
 
     def __readFluentReportFiles(self):
         df_list = []
@@ -126,10 +128,10 @@ class Mesclar:
             data.reset_index(drop=True, inplace=True)
             data.index = data.index + 1
 
-            if not os.path.exists(self.destinationPath):
-                os.makedirs(self.destinationPath)
+            if not path.exists(self.destinationPath):
+                makedirs(self.destinationPath)
 
-            data.to_csv(os.path.join(self.destinationPath, file_name + '.csv'), sep=';', decimal=".", index=False)
+            data.to_csv(path.join(self.destinationPath, file_name + '.csv'), sep=';', decimal=".", index=False)
                     
 
 
