@@ -34,6 +34,7 @@ class Ui(QMainWindow):
         self.setCommands()
 
         self.show()
+        self.openFileNameDialog()
 
     def getComponents(self):
         """ Find components in window.ui and set to self variables """
@@ -62,8 +63,11 @@ class Ui(QMainWindow):
         """ Open FileDialog and get the full path of a file """
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(self, "QFileDialog.getOpenFileName()", "",
-                                                  "All Files (*);;CSV Files (*.csv)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, 
+                                                 "Select a report file", 
+                                                 "",
+                                                 "Report Files (*.csv *.out);; All Files (*)", 
+                                                 options=options)
         if fileName:
             self.lineEdit.setText(fileName)
 
