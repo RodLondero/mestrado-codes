@@ -247,16 +247,22 @@ class Ui(QMainWindow):
             start_time = time.time()
 
             for i, line in enumerate(open(path)):
+                # Get title columns
                 if not columns:
                     for match in re.finditer(pattern_title, line):
                         print("Getting titles...")
                         columns = self.get_titles(match.group())
 
+                # Get data
                 for match in re.finditer(pattern_data, line):
                     result = match.group().strip().split()
 
+                    # Format values to Float
+                    for i in range(0, len(result[:-2])):
+                        result[i] = float(result[i])
+    
                     if (int(result[0]) % 1000 == 0) and int(result[-1]) != 0:
-                        print("Getting iteration: " + result[0])
+                        print(f"Getting iteration: {result[0]}")
 
                     lines.append(result)
 
@@ -362,6 +368,9 @@ class Ui(QMainWindow):
                                   showgrid=True,
                                   # Zero line
                                   zeroline=False,
+                                  # Exponent format
+                                  showexponent='all',
+                                  exponentformat='none',
                                   # Border
                                   showline=True,
                                   linewidth=1,
