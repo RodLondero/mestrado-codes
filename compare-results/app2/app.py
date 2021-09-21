@@ -126,9 +126,15 @@ class Ui(QMainWindow):
 
     @staticmethod
     def filter(text, keywords):
-        # foo filter
-        # in the example the text must be in keywords
-        return text in keywords
+        text = text.split(" ")
+        regex = ""
+        for f in text:
+            regex += f"(?=.*{f})"
+        
+        x = re.search(f"{regex}", keywords, re.IGNORECASE)
+        if x:
+            return x.string
+        # return text in keywords
 
     def load_files(self, fname):
         self.listArquivos.clear()
@@ -383,11 +389,12 @@ class Ui(QMainWindow):
                                   type='linear' if 'flow-time' in df.columns else 'log'
                               ),
                               legend=dict(
-                                  orientation="h",
-                                  yanchor="bottom",
-                                  y=1.02,
-                                  xanchor="right",
-                                  x=1),
+                                  orientation="v",
+                                #   yanchor="bottom",
+                                #   y=1.02,
+                                #   xanchor="right",
+                                #   x=1
+                            ),
                               template='simple_white'
                               )
 
