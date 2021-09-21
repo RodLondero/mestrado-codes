@@ -1,0 +1,3 @@
+- HOA
+- 3 eletrodos cilíndricos
+- 1 calorímetro completo
