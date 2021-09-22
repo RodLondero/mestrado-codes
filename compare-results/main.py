@@ -1,4 +1,5 @@
-import sys, os
+import sys
+import os
 from PyQt5 import QtWidgets
 
 from app2.app import Ui
