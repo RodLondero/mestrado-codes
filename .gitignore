@@ -27,3 +27,7 @@ merge-reports/@run_merge_reports.bat
 
 # Other files
 desktop.ini
+calcula-ei/.calcula-ei.lnk
+compare-results/.compare-results.lnk
+get-time-simulation/.get-time-simulation.lnk
+plot-residuals/src/.plot-residuals.lnk
