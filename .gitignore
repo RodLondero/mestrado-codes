@@ -24,6 +24,7 @@ merge-reports/@run_merge_reports.bat
 *.out
 *.trn
 *.csv
+!arc-impedance/*/*.csv
 
 # Other files
 desktop.ini
