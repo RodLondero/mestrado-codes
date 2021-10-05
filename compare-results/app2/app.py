@@ -341,6 +341,7 @@ class Ui(QMainWindow):
             fig = go.Figure()
 
             self.total = dict()
+            maximum = dict()
 
             df_count = 0
             for df in self.dfs:
@@ -349,6 +350,7 @@ class Ui(QMainWindow):
                 for coluna in self.listColunas.selectedItems():
                     if coluna.text() in df.columns:
                         self.total[f"{name}_{coluna.text()}"] = df[coluna.text()].count()
+                        maximum[f"{name}_{coluna.text()}"] = df[coluna.text()].max()
                         fig.add_trace(
                             go.Scatter(x=df['flow-time'] if 'flow-time' in df.columns else df['iter'],
                                        y=df[coluna.text()],
@@ -413,8 +415,16 @@ class Ui(QMainWindow):
                     self.checkBoxSVG.isChecked()):
                 self.salvar(fig)
 
-            for key, value in self.total.items():
-                print(f"{key}: {value}")
+            tamanho_dict = len(self.total)
+            colunas = list(self.total.keys())
+            totais = list(self.total.values())
+            maximos = list(maximum.values())
+
+            os.system("cls")
+            for i in range(0, tamanho_dict):
+                print(f"{colunas[i]}: \t Total: {totais[i]} \t Maximo: {maximos[i]:.4f}")
+            # for key, value in self.total.items():
+            #     print(f"{key}: {value}")
             fig.show()
 
         except Exception as e:
