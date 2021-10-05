@@ -131,12 +131,12 @@
      </property>
      <item>
       <property name="text">
-       <string>Espaço</string>
+       <string>;</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>;</string>
+       <string>Espaço</string>
       </property>
      </item>
      <item>
@@ -337,6 +337,18 @@
       <height>20</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string/>
+    </property>
+    <property name="toolTipDuration">
+     <number>-1</number>
+    </property>
+    <property name="statusTip">
+     <string/>
+    </property>
+    <property name="whatsThis">
+     <string/>
+    </property>
    </widget>
    <widget class="QLineEdit" name="editFiltroColunas">
     <property name="geometry">
@@ -438,6 +450,26 @@
    </widget>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>editFiltro</tabstop>
+  <tabstop>listArquivos</tabstop>
+  <tabstop>btnAbrir</tabstop>
+  <tabstop>comboSep</tabstop>
+  <tabstop>comboDecimal</tabstop>
+  <tabstop>listColunas</tabstop>
+  <tabstop>editPasta</tabstop>
+  <tabstop>btnPasta</tabstop>
+  <tabstop>checkBoxCSV</tabstop>
+  <tabstop>btnPlotar</tabstop>
+  <tabstop>checkBoxSVG</tabstop>
+  <tabstop>checkBoxPDF</tabstop>
+  <tabstop>checkBoxHTML</tabstop>
+  <tabstop>comboOpcoes</tabstop>
+  <tabstop>btnAtualizar</tabstop>
+  <tabstop>editFiltroColunas</tabstop>
+  <tabstop>sliderMax</tabstop>
+  <tabstop>sliderMin</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
