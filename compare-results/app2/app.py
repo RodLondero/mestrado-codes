@@ -9,7 +9,7 @@ import pandas as pd
 import plotly.graph_objs as go
 from PyQt5 import QtCore, uic
 from PyQt5.QtWidgets import QLabel, QLineEdit, QListWidget, QSlider, QToolButton, QPushButton, QComboBox, QCheckBox, QFileDialog
-from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QInputDialog, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QInputDialog, QMessageBox, QDoubleSpinBox
 
 pathdir = pathlib.Path(__file__).parent.absolute()
 
@@ -87,6 +87,8 @@ class Ui(QMainWindow):
 
         self.sliderMax = self.findChild(QSlider, 'sliderMax')  # type: QSlider
         self.sliderMax.valueChanged.connect(self.on_sliderMax_valueChanged)
+
+        self.spinBoxConstante = self.findChild(QDoubleSpinBox, 'spinBoxConstante')  # type: QDoubleSpinBox
 
     def _open_folder_dialog(self):
         fname = QFileDialog.getExistingDirectory(self, "Selecione o diretório.")
@@ -342,11 +344,16 @@ class Ui(QMainWindow):
 
             self.total = dict()
             maximum = dict()
-
+            max_time_step = 0
+            
             df_count = 0
             for df in self.dfs:
+                
                 name = df.Name
                 df = df.loc[self.sliderMin.value():self.sliderMax.value()].copy()
+                
+                max_time_step = max(max_time_step, df['flow-time'].max())
+
                 for coluna in self.listColunas.selectedItems():
                     if coluna.text() in df.columns:
                         self.total[f"{name}_{coluna.text()}"] = df[coluna.text()].count()
@@ -362,6 +369,18 @@ class Ui(QMainWindow):
                         )
                 df_count += 1
 
+            if self.spinBoxConstante.value() > 0:
+                valor = self.spinBoxConstante.value()
+                fig.add_trace(
+                    go.Scatter(x=[0, max_time_step],
+                                y=[valor, valor],
+                                name=f"{valor}",
+                                mode='lines',
+                                # marker_symbol=random.choice(symbols),
+                                line=dict(dash="solid", color="gray")
+                                )
+                )
+            
             fig.update_layout(title="Comparação de resultados",
                               # X Axis configuration  
                               xaxis=dict(
