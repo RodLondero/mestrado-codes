@@ -37,7 +37,7 @@ class App(QMainWindow):
         pattern_seconds = "t_sec:\s([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\ss"
         pattern_minutes = "t_min:\s([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\smin"
         pattern_hour = "t_h:\s+([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[eE]([+-]?\d+))?\sh"
-        pattern_time_step = "Time-Step:\s+[0-9]+"
+        pattern_time_step = "\sTime-Step:\s+[0-9]+"
 
         # Inicialização das listas
         time_step = list()
@@ -58,11 +58,20 @@ class App(QMainWindow):
         # self.df.set_index('time-step', inplace=True)
 
         # Imprime na tela os TOTAIS e a MÉDIA
+        print("="*50)
         print("Total")
-        print(self.df.sum())
-
-        print("\nMédia")
-        print(self.df.mean())
+        print("="*50)
+        print(f"Time-Step: \t {self.df['time-step'].iloc[-1]}")
+        print(f"t_sec:  \t {self.df['t_sec'].sum()}")
+        print(f"t_min:  \t {self.df['t_min'].sum()}")
+        print(f"t_h:    \t {self.df['t_h'].sum()}")
+        
+        print("="*50)
+        print("Média")
+        print("="*50)
+        print(f"t_sec:  \t {self.df['t_sec'].mean()}")
+        print(f"t_min:  \t {self.df['t_min'].mean()}")
+        print(f"t_h:    \t {self.df['t_h'].mean()}")
 
         # Plot dos tempos
         opcao = input(
