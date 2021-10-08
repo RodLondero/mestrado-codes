@@ -16,6 +16,7 @@ venv
 # Bat files
 get-time-simulation/run_get_time_simulation.bat
 compare-results/run_compare_results.bat
+compare-results/.compare-results.bat
 calcula-ei/@run_calcula_ei.bat
 plot-residuals/src/@run_plot_residuals.bat
 merge-reports/@run_merge_reports.bat
@@ -32,3 +33,4 @@ calcula-ei/.calcula-ei.lnk
 compare-results/.compare-results.lnk
 get-time-simulation/.get-time-simulation.lnk
 plot-residuals/src/.plot-residuals.lnk
+arc-impedance/Caso_02/Impedância_do_arco_Caso_02.rar
