@@ -1,29 +1,25 @@
-#include "udf.h"
+// #include "udf.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
 #include "math.h"
-//#include "ctype.h"
-
-#define I_MAX_DEFAULT 10e3
-#define PHASES_MONO 1
-#define PHASES_BI 2
-#define PHASES_TRI 3
-#define PHASES_DEFAULT 3
-#define FREQ 60
+#include "ctype.h"
 
 #define DEFLEN 10
 #define BUFSIZ 512
 #define PI 3.14159265358979323846
+#define FREQ 60
 
-static char DELIMITER[] = {"    "};
-static char EXTENSAO[] = {".current"};
-static char INPUT_FILE_NAME[] = {"input.txt"};
-static char EXCITACOES_IN_FILE_NAME[] = {"_excitacoes.in"};
-static char EXCITACOES_OUT_FILE_NAME[] = {"_excitacoes.out"};
-static char LOG_FILE_NAME[] = {"_log_current.txt"};
-//static double CURRENT_TIME = 12e-5;
-real I_MAX = I_MAX_DEFAULT;
+static char DELIMITER[]                 = {"    "};
+static char EXTENSAO[]                  = {".current"};
+static char INPUT_FILE_NAME[]           = {"input.txt"};
+static char EXCITACOES_IN_FILE_NAME[]   = {"_excitacoes.in"};
+static char EXCITACOES_OUT_FILE_NAME[]  = {"_excitacoes.out"};
+static char LOG_FILE_NAME[]             = {"logs/_log_current.txt"};
+
+static double CURRENT_TIME = 8.333e-5;
+double i_max[3] = {0, 0, 0};
+double angulo[3] = {0, 0, 0};
 int PHASES = 3;
 
 typedef struct
@@ -71,25 +67,34 @@ char* getPath()
     }
     fclose(arquivo);
 
-    strcpy(path, conteudo[3]);
-    // strcat(path, "\\");
-    strcat(path, conteudo[4]);
-    strcat(path, EXTENSAO);
+    // Imprime o conteúdo do input.txt
+    // for(i=0; i < sizeof(conteudo)/sizeof(conteudo[0]); i++)
+    //     printf("%d - %s\n", i, conteudo[i]);
 
+    // Concatenação do caminho do arquivo .current
+    strcpy(path, conteudo[3]);  // Caminho do arquivo da pasta de acoplamento
+    strcat(path, conteudo[4]);  // Nome do Setup
+    strcat(path, EXTENSAO);     // Extensão .current
+
+    // Número de fases
     removeChar(conteudo[5], ' ');
     if (strlen(conteudo[5]) > 0)
-        I_MAX = strtod(conteudo[5], NULL);
+        PHASES = atoi(conteudo[5]);
     else
-        I_MAX = I_MAX_DEFAULT;
+        PHASES = 1;
 
-    removeChar(conteudo[6], ' ');
-    if (strlen(conteudo[6]) > 0)
-        PHASES = atoi(conteudo[6]);
-    else
-        PHASES = PHASES_DEFAULT;
+    for(i=0; i<PHASES; i++)
+    {
+        char delim[] = " ";
+        char * token = strtok(conteudo[6+i], delim);
+        i_max[i] = atof(token);
+        token = strtok(NULL, delim);
+        angulo[i] = atof(token);
+    }
 
-    Message("\n\nImax: %f", I_MAX);
-    Message("\nPhases: %d\n", PHASES);
+    for(i=0; i<PHASES; i++)
+        printf("Imax[%d] = %f |_ %f\n", i, i_max[i], angulo[i]);
+    printf("\nPhases: %d\n", PHASES);
 
     return path;
 }
@@ -121,19 +126,31 @@ void calculaCorrente(Excitacoes *excitacao)
     double wt = 2 * PI * FREQ * t;
     char nome[BUFSIZ] = {""}, *token;
 
-    double *corrente = (double *)malloc(PHASES * sizeof(double));    
-    for (int i = 0; i < PHASES; i++)
-        corrente[i] = 0;
+    printf("\n\nCalculando as novas correntes...");
 
-    Message("\n\nCalculando as novas correntes...");
+	excitacao[0].valor = i_max[0] * cos(wt + angulo[0] * PI/180);
 
-	excitacao[0].valor = I_MAX * cos(wt);
     if (PHASES == 2)
-        excitacao[1].valor = I_MAX * cos(wt - PI);
+         excitacao[1].valor = i_max[1] * cos(wt + angulo[1] * PI/180);
     if (PHASES == 3)
     {
-        excitacao[1].valor = I_MAX * cos(wt - 2*PI/3);
-        excitacao[2].valor = I_MAX * cos(wt + 2*PI/3);
+        excitacao[1].valor = i_max[1] * cos(wt + angulo[1] * PI/180);
+		excitacao[2].valor = i_max[2] * cos(wt + angulo[2] * PI/180);
+
+        // Correção para a soma das correntes ser igual a zero
+        char n1[40], n2[40], n3[40];
+
+        double soma = excitacao[0].valor + excitacao[1].valor + excitacao[2].valor;
+
+        sprintf(n1, "%.4f", excitacao[0].valor - soma/3);
+        sprintf(n2, "%.4f", excitacao[1].valor - soma/3);
+        sprintf(n3, "%.4f", excitacao[2].valor - soma/3);
+
+        excitacao[0].valor = atof(n1);
+        excitacao[1].valor = atof(n2);
+        excitacao[2].valor = atof(n3);
+
+        printf("\nSoma: %f", excitacao[0].valor + excitacao[1].valor + excitacao[2].valor);
     }
 }
 
@@ -155,24 +172,24 @@ void setCorrente()
 
     if(path_current)
     {
-        //Message("\nDeclaração das Excitações");
+        //printf("\nDeclaração das Excitações");
         Excitacoes *ex_in  = (Excitacoes *)malloc(PHASES * sizeof(Excitacoes));
         Excitacoes *ex_out = (Excitacoes *)malloc(PHASES * sizeof(Excitacoes));
         Excitacoes *ex     = (Excitacoes *)malloc(PHASES * sizeof(Excitacoes));
 
-        Message("\nBuscando excitações de entrada...");
+        printf("\nBuscando excitações de entrada...");
         getExcitacoes(ex_in, 0);        
-        Message("\nBuscando excitações de saída...");
+        printf("\nBuscando excitações de saída...");
         getExcitacoes(ex_out, 1);
 
-        Message("\nAbrindo o arquivo\t %s", path_current);
+        printf("\nAbrindo o arquivo\t %s", path_current);
 
         FILE* arquivo_current = fopen(path_current, "r");
 
         if (arquivo_current != NULL)
         {
             // Obtém o conteúdo do arquivo Setup1.current
-            Message("\nLendo o arquivo\t %s", path_current);
+            printf("\nLendo o arquivo\t %s", path_current);
             
             fgets(linha, BUFSIZ, arquivo_current);
             n_linhas_in_current = atoi(linha);
@@ -187,8 +204,8 @@ void setCorrente()
             fclose(arquivo_current);
 
             // Exibe o conteúdo do .current atual
-            Message("\n\n\tsetup1.current ATUAL:");
-            Message("\n\t%d", n_linhas_in_current);
+            printf("\n\n\tsetup1.current ATUAL:");
+            printf("\n\t%d", n_linhas_in_current);
 
             for(i = 0; i < n_linhas_in_current; i++)
             {			
@@ -203,9 +220,9 @@ void setCorrente()
                 token = strtok(NULL, DELIMITER);    // Obtém o valor 
                 ex[i].valor = strtod(token, NULL);  // Converte para float e salva
                 
-                Message("\n\t%s", ex[i].nome);
-                Message("\t%d", ex[i].face_id);
-                Message("\t%f", ex[i].valor);
+                printf("\n\t%s", ex[i].nome);
+                printf("\t%d", ex[i].face_id);
+                printf("\t%f", ex[i].valor);
             }
 
             // Calculo das correntes
@@ -254,33 +271,41 @@ void setCorrente()
             arquivo_current = fopen(path_current, "w+");
             fprintf(arquivo_current, "%d\n", n_linhas_in_current);
             
-            Message("\n\n\tsetup1.current NOVO:");
-            Message("\n\t%d", n_linhas_in_current);
+            printf("\n\n\tsetup1.current NOVO:");
+            printf("\n\t%d", n_linhas_in_current);
 
+            // Escreve o tempo no arquivo de log
             sprintf(sLog, "%f", CURRENT_TIME);
             
             for (i=0; i < n_linhas_in_current; i++)
             {	
+                // Salva as correntes no arquivo .current
                 fprintf(arquivo_current, "%s%s%d%s%f\n", ex[i].nome, DELIMITER, ex[i].face_id, DELIMITER, ex[i].valor);
                 
+                // Salva as correntes no log
                 sprintf(sLog, "%s\t%.4f", sLog, ex[i].valor);
                 
-                Message("\n\t%s\t%d\t%f", ex[i].nome, ex[i].face_id, ex[i].valor);
+                // Imprime na tela as correntes
+                printf("\n\t%s\t%d\t%f", ex[i].nome, ex[i].face_id, ex[i].valor);
             }
             
+            // Adidiona quebra de linha no final da linha do log
             sprintf(sLog, "%s\n", sLog);
+            // Grava o arquivo de log
             fprintf(log_file, sLog);
             
+            // Fecha os arquivos
             fclose(log_file);
             fclose(arquivo_current);
             
-            Message("\n\nTime: %f\n", CURRENT_TIME);
+            printf("\n\nLog salvo em: ./%s", LOG_FILE_NAME);
+            printf("\n\nTime: %f\n", CURRENT_TIME);
         }
         else
-            Message("\nNão foi possível abrir o arquivo %s", path_current);   
+            printf("\nNão foi possível abrir o arquivo %s", path_current);   
     }
     else
-        Message("\nNão foi possível ler o arquivo %s.", INPUT_FILE_NAME);
+        printf("\nNão foi possível ler o arquivo %s.", INPUT_FILE_NAME);
 #endif
 }
 
