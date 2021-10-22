@@ -17,7 +17,7 @@ static char EXCITACOES_IN_FILE_NAME[]   = {"_excitacoes.in"};
 static char EXCITACOES_OUT_FILE_NAME[]  = {"_excitacoes.out"};
 static char LOG_FILE_NAME[]             = {"logs/_log_current.txt"};
 
-static double CURRENT_TIME = 8.333e-5;
+// static double CURRENT_TIME = 8.333e-5;
 double i_max[3] = {0, 0, 0};
 double angulo[3] = {0, 0, 0};
 int PHASES = 3;
