@@ -6,9 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>593</width>
-    <height>302</height>
+    <width>590</width>
+    <height>300</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>590</width>
+    <height>300</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>590</width>
+    <height>300</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Calcular EI</string>
@@ -94,7 +106,7 @@
      <rect>
       <x>20</x>
       <y>60</y>
-      <width>141</width>
+      <width>71</width>
       <height>16</height>
      </rect>
     </property>
@@ -140,7 +152,7 @@
      <string>Calcular EI</string>
     </property>
    </widget>
-   <widget class="QListWidget" name="listWidget">
+   <widget class="QListWidget" name="listFiles">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -149,18 +161,21 @@
       <height>181</height>
      </rect>
     </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::MultiSelection</enum>
+    </property>
    </widget>
-   <widget class="QPushButton" name="btnAbrir">
+   <widget class="QPushButton" name="btnAtualizar">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>80</y>
-      <width>121</width>
+      <x>410</x>
+      <y>30</y>
+      <width>81</width>
       <height>24</height>
      </rect>
     </property>
     <property name="text">
-     <string>Abrir</string>
+     <string>Atualizar</string>
     </property>
    </widget>
    <widget class="QGroupBox" name="groupBox">
@@ -269,6 +284,22 @@
       <string>Energia Interna</string>
      </property>
     </widget>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxPlotar">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>80</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Plotar</string>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
    </widget>
   </widget>
  </widget>

@@ -1,13 +1,14 @@
 import math
-import os
+import os, sys
 import pathlib
 from datetime import datetime
 
 import pandas as pd
 import plotly.graph_objects as go
 from PyQt5 import uic
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QLineEdit, QToolButton, QComboBox, QCheckBox, QListWidget, QRadioButton, QFileDialog
-from PyQt5.QtWidgets import QMessageBox, QInputDialog, QMainWindow, QPushButton
+from PyQt5.QtWidgets import QMessageBox, QInputDialog, QMainWindow, QPushButton, QApplication, QAbstractItemView, QSizePolicy
 from plotly.subplots import make_subplots
 
 from .calc_ei import calc_by_ASTM, calc_by_energia_interna
@@ -16,6 +17,12 @@ pathdir = pathlib.Path(__file__).parent.absolute()
 
 
 class Ui(QMainWindow):
+    colunas_temp = list()
+    colunas_ei   = list()
+    max_EI = 0
+    max_EI_name = ''
+    min_EI = 1000
+    min_EI_name = ''
 
     def __init__(self):
         super(Ui, self).__init__()
@@ -27,8 +34,6 @@ class Ui(QMainWindow):
         """ Initializes the window """
 
         self.setWindowTitle("Calculo de Energia Incidente")
-        self.setMinimumSize(600, 300)
-        self.setFixedSize(600, 300)
 
         self.getComponents()
         self.setCommands()
@@ -41,20 +46,24 @@ class Ui(QMainWindow):
         self.lineEdit        = self.findChild(QLineEdit,   'lineEdit')        # type: QLineEdit
         self.btnFile         = self.findChild(QToolButton, 'toolButton')      # type: QToolButton
         self.btnCalcular     = self.findChild(QPushButton, 'btnCalcular')     # type: QToolButton
-        self.btnAbrir        = self.findChild(QPushButton, 'btnAbrir')        # type: QToolButton
+        self.btnAtualizar    = self.findChild(QPushButton, 'btnAtualizar')    # type: QToolButton
         self.comboBoxSep     = self.findChild(QComboBox,   'comboBoxSep')     # type: QComboBox
         self.comboBoxDecimal = self.findChild(QComboBox,   'comboBoxDecimal') # type: QComboBox
         self.checkBoxHTML    = self.findChild(QCheckBox,   'checkBoxHTML')    # type: QCheckBox
         self.checkBoxCSV     = self.findChild(QCheckBox,   'checkBoxCSV')     # type: QCheckBox       
         self.checkBoxPDF     = self.findChild(QCheckBox,   'checkBoxPDF')     # type: QCheckBox
         self.checkBoxSVG     = self.findChild(QCheckBox,   'checkBoxSVG')     # type: QCheckBox
-        self.list1           = self.findChild(QListWidget, 'listWidget')      # type: QListWidget
+        self.checkBoxPlotar  = self.findChild(QCheckBox,   'checkBoxPlotar')  # type: QCheckBox
+        self.listFiles       = self.findChild(QListWidget, 'listFiles')       # type: QListWidget
+        self.listColunas     = self.findChild(QListWidget, 'listColunas')     # type: QListWidget
+
+        self.listFiles.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
     def setCommands(self):
         """ Set actions to window elements """
         self.btnFile.clicked.connect(self.openFileNameDialog)
         self.btnCalcular.clicked.connect(self.calcular_ei)
-        self.btnAbrir.clicked.connect(self.abrirArquivos)
+        self.btnAtualizar.clicked.connect(self.abrirArquivos)
         self.comboBoxSep.currentTextChanged.connect(self.abrirArquivos)
         self.comboBoxDecimal.currentTextChanged.connect(self.abrirArquivos)
         self.lineEdit.textChanged.connect(self.abrirArquivos)
@@ -94,12 +103,12 @@ class Ui(QMainWindow):
                 self.df = self.readOutFile(fileName)
 
             # Clear the list with the columns
-            self.list1.clear()
+            self.listFiles.clear()
 
             # Get the columns from file
             for c in self.df.columns:
                 if c.lower().strip().replace(" ", "-") not in ['time-step', 'flow-time']:
-                    self.list1.addItem(c)
+                    self.listFiles.addItem(c)
 
         except Exception as e:
             msg = QMessageBox()
@@ -108,6 +117,9 @@ class Ui(QMainWindow):
             msg.setInformativeText("{0}".format(e))
             msg.setWindowTitle("Erro")
             msg.exec_()
+
+    def reset_column_list(self):
+        self.listColunas.clear()
 
     def readOutFile(self, filename: str):
         """ Read a .out file """
@@ -147,38 +159,72 @@ class Ui(QMainWindow):
                 raise Exception("Selecione um arquivo.")
 
             # Check if an item is selected
-            if not self.list1.selectedItems():
+            if not self.listFiles.selectedItems():
                 raise Exception("Selecione uma coluna")
 
             path = self.lineEdit.text()
             separador = " " if str(self.comboBoxSep.currentText()) == "Espaço" else str(self.comboBoxSep.currentText())
             decimal = str(self.comboBoxDecimal.currentText())
 
-            selecao = self.list1.selectedItems()[0].text()
-            # Calc EI using ASTM 
-            if self.radioButtonASTM.isChecked():
-                self.df['EI'] = calc_by_ASTM(self.df[selecao].tolist())
-            elif self.radioButtonEnergia.isChecked():
-                self.df['EI'] = calc_by_energia_interna(self.df[selecao].tolist())
+            # selecao = self.listFiles.selectedItems()[0].text()
+            # selecao = list()
+            self.colunas_ei.clear()
+            self.colunas_temp.clear()
+            mensagem = ""
+
+            for selected in self.listFiles.selectedItems():
+                # Calc EI using ASTM 
+                coluna_temp   = selected.text()
+                nome_original = coluna_temp.split("(")[0]
+                coluna_ei     = coluna_temp.replace(nome_original, "EI")
+                self.colunas_temp.append(coluna_temp)
+                self.colunas_ei.append(coluna_ei)
+
+                if self.radioButtonASTM.isChecked():
+                    self.df[coluna_ei] = calc_by_ASTM(self.df[selected.text()].tolist())
+                elif self.radioButtonEnergia.isChecked():
+                    self.df[coluna_ei] = calc_by_energia_interna(self.df[selected.text()].tolist())
+
+                # Get the max EI
+                max_EI = f"{self.df[coluna_ei].max():.4f} [cal/cm^2]"
+                mensagem += f"\n{'Máxima ' + coluna_ei + ':':<30}{max_EI:>15}"
+
+                old_max_ei = self.max_EI 
+                self.max_EI = max(self.max_EI, self.df[coluna_ei].max())
+                if old_max_ei != self.max_EI:
+                    self.max_EI_name = coluna_ei
+
+                old_min_ei = self.min_EI 
+                self.min_EI = min(self.min_EI, self.df[coluna_ei].max())
+                if old_min_ei != self.min_EI:
+                    self.min_EI_name = coluna_ei
 
             # Show the results
             # self.showResults()
 
             # Get the max EI
-            max_EI = f"{self.df['EI'].max():.4f} [cal/cm^2]"
+            mensagem += f"\n\nMáxima EI: \n{self.max_EI_name + ' =':<20}{self.max_EI:>15.4f} [cal/cm^2]"
+            mensagem += f"\n\nMínima EI: \n{self.min_EI_name + ' =':<20}{self.min_EI:>15.4f} [cal/cm^2]"
 
             # Print the max EI
-            print(f"\nMáxima EI: {max_EI}")
+            print(mensagem)
 
             # Make a plot
-            self.plot()
+            if self.checkBoxPlotar.isChecked():
+                self.plot()
+
+            self.saveCSV()
 
             # Show a message with the max EI
+            font = QFont()
+            font.setFamily("Consolas")
+            font.setPointSize(9)
+
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
-            msg.setText("Máxima EI")
-            msg.setInformativeText(max_EI)
+            msg.setText(mensagem)
             msg.setWindowTitle("Informação")
+            msg.setFont(font)
             msg.exec_()
         except Exception as e:
             print("{0}".format(e))
@@ -197,76 +243,79 @@ class Ui(QMainWindow):
         fig = make_subplots(rows=1, cols=2)
 
         # Add the first plot related to Temperature
-        fig.add_trace(
-            go.Scatter(x=df['flow-time'], y=df[self.list1.selectedItems()[0].text()], name="Temperatura"),
-            row=1, col=1)
+        for i in range(0, len(self.colunas_temp)):
+            fig.add_trace(
+                go.Scatter(x=df['flow-time'], y=df[self.colunas_temp[i]], name=self.colunas_temp[i]),
+                row=1, col=1)
 
-        # Add the second plot related to EI
-        fig.add_trace(
-            go.Scatter(x=df['flow-time'], y=df['EI'], name="Energia Incidente"),
-            row=1, col=2)
+            # Add the second plot related to EI
+            fig.add_trace(
+                go.Scatter(x=df['flow-time'], y=df[self.colunas_ei[i]], name=self.colunas_ei[i]),
+                row=1, col=2)
 
-        # Add an annotation to show the maximum EI
-        fig.add_annotation(x=df['flow-time'].iat[-1], y=df['EI'].iat[-1],
-                           text=f"{df['EI'].iat[-1]:.4f}",
-                           showarrow=True,
-                           arrowhead=1,
-                           row=1, col=2)
+            # Add an annotation to show the maximum EI
+            fig.add_annotation(x=df['flow-time'].iat[-1], y=df[self.colunas_ei[i]].iat[-1],
+                               text=f"{df[self.colunas_ei[i]].iat[-1]:.4f}",
+                               showarrow=True,
+                               arrowhead=1,
+                               row=1, col=2)
 
         # Some configuration for the plot
         fig.update_layout(title_text="Energia Incidente")
 
         # Save the data if some checkbox is checked
         if (self.checkBoxHTML.isChecked() or 
-            self.checkBoxCSV.isChecked() or 
             self.checkBoxPDF.isChecked() or
             self.checkBoxSVG.isChecked()):
-            self.salvar(fig)
+            self.saveFigure(fig)
 
         # Show the plot
         fig.show()
 
-    def salvar(self, fig: go.Figure):
+    def getSavePath(self):
+        """ Get the path to save the file """
+        path = QFileDialog.getExistingDirectory(self, "Salvar em", "")
+        # Generate a default name for the file with datetime
+        now = datetime.now()
+        now_str = now.strftime("%Y-%m-%d_%H%M%S")
+        name = f"Energia_Incidente_{now_str}"
+
+        # Set the name to file
+        dialog = QInputDialog()  # type: QInputDialog
+        text, ok = dialog.getText(self, 'Nome do arquivo', 'Insira um nome para salvar o arquivo', text=name)
+        if ok:
+            name = text
+
+        return path, name
+
+    def saveCSV(self):
+        # Save the data in CSV file
+        if self.checkBoxCSV.isChecked():
+            directory, name = self.getSavePath()
+            
+            self.df.to_csv(f"{directory}/{name}.csv",
+                            sep=";",
+                            columns=['flow-time'] + self.colunas_temp + self.colunas_ei,
+                            index=False,
+                            na_rep="NA")
+
+    def saveFigure(self, fig: go.Figure):
         """ Save the Temperature and EI """
 
-        # Select the directory to save the file
-        dialog = QFileDialog()
-        directory = str(dialog.getExistingDirectory(self, "Selecione o diretório para salvar."))
+        directory, name = self.getSavePath()
 
-        # IF the directory is selected
-        if directory != "":
-            # Generate a default name for the file with datetime
-            now = datetime.now()
-            now_str = now.strftime("%Y-%m-%d_%H%M%S")
-            name = f"Energia_Incidente_{now_str}"
+        # Save the plot in HTML file
+        if self.checkBoxHTML.isChecked():
+            fig.write_html(f"{directory}/{name}.html")
 
-            # Set the name to file
-            dialog = QInputDialog()  # type: QInputDialog
-            text, ok = dialog.getText(self, 'Nome do arquivo', 'Insira um nome para salvar o arquivo', text=name)
-            if ok:
-                name = text
+        # Save the plot in PDF file
+        if self.checkBoxPDF.isChecked():
+            fig.write_image(f"{directory}/{name}.pdf")
 
-            # Save the plot in HTML file
-            if self.checkBoxHTML.isChecked():
-                fig.write_html(f"{directory}/{name}.html")
-
-            # Save the plot in PDF file
-            if self.checkBoxPDF.isChecked():
-                fig.write_image(f"{directory}/{name}.pdf")
-
-            # Save the plot in SVG file
-            if self.checkBoxSVG.isChecked():
-                fig.update_layout(title="")
-                fig.write_image(f"{directory}/{name}.svg")
-
-            # Save the data in CSV file
-            if self.checkBoxCSV.isChecked():
-                coluna = self.list1.currentItem().text()
-                self.df.to_csv(f"{directory}/{name}.csv",
-                               sep=";",
-                               columns=['flow-time', coluna, 'EI'],
-                               index=False,
-                               na_rep="NA")
+        # Save the plot in SVG file
+        if self.checkBoxSVG.isChecked():
+            fig.update_layout(title="")
+            fig.write_image(f"{directory}/{name}.svg")
 
         self.filename1 = None
         self.filename2 = None
@@ -288,3 +337,10 @@ def round_up(n, decimals=0):
     """
     multiplier = 10 ** decimals
     return math.ceil(n * multiplier) / multiplier
+
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    ex = Ui()
+    sys.exit(app.exec_())
