@@ -19,6 +19,7 @@ pathdir = pathlib.Path(__file__).parent.absolute()
 class Ui(QMainWindow):
     colunas_temp = list()
     colunas_ei   = list()
+    EIs    = list()
     max_EI = 0
     max_EI_name = ''
     min_EI = 1000
@@ -186,16 +187,18 @@ class Ui(QMainWindow):
                     self.df[coluna_ei] = calc_by_energia_interna(self.df[selected.text()].tolist())
 
                 # Get the max EI
-                max_EI = f"{self.df[coluna_ei].max():.4f} [cal/cm^2]"
-                mensagem += f"\n{'Máxima ' + coluna_ei + ':':<30}{max_EI:>15}"
+                max_EI = self.df[coluna_ei].max()
+                mensagem += f"\n{'Máxima ' + coluna_ei + ':':<30}{max_EI:.4f} [cal/cm^2]"
+
+                self.EIs.append(max_EI)
 
                 old_max_ei = self.max_EI 
-                self.max_EI = max(self.max_EI, self.df[coluna_ei].max())
+                self.max_EI = max(self.max_EI, max_EI)
                 if old_max_ei != self.max_EI:
                     self.max_EI_name = coluna_ei
 
                 old_min_ei = self.min_EI 
-                self.min_EI = min(self.min_EI, self.df[coluna_ei].max())
+                self.min_EI = min(self.min_EI, max_EI)
                 if old_min_ei != self.min_EI:
                     self.min_EI_name = coluna_ei
 
@@ -203,8 +206,9 @@ class Ui(QMainWindow):
             # self.showResults()
 
             # Get the max EI
-            mensagem += f"\n\nMáxima EI: \n{self.max_EI_name + ' =':<20}{self.max_EI:>15.4f} [cal/cm^2]"
-            mensagem += f"\n\nMínima EI: \n{self.min_EI_name + ' =':<20}{self.min_EI:>15.4f} [cal/cm^2]"
+            mensagem += f"\n\n{'Média EI: ':<30}{sum(self.EIs)/len(self.EIs):.4f} [cal/cm^2]"
+            mensagem += f"\n{'Máxima ' + self.max_EI_name + ' =':<30}{self.max_EI:.4f} [cal/cm^2]"
+            mensagem += f"\n{'Mínima ' + self.min_EI_name + ' =':<30}{self.min_EI:.4f} [cal/cm^2]"
 
             # Print the max EI
             print(mensagem)
