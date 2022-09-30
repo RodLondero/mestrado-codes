@@ -1,6 +1,6 @@
 # Mestrado-codes
 
-Esse espaço está sendo utilizado para controlar os cálculos e algortimos utilizados ao longo do mestrado
+Esse espaço está sendo utilizado para organizar os cálculos e algoritmos utilizados ao longo do mestrado.
 
 ---
 
